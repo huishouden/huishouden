@@ -1,0 +1,14 @@
+# Base config for the household PWA repos: gitleaks defaults plus personal-data rules.
+# App repos copy this file and add their own [[allowlists]] entries.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "personal-email"
+description = "Personal email address (household members' accounts must stay out of the repo)"
+regex = '''[a-zA-Z0-9._%+-]+@(?:gmail|googlemail|icloud|me|outlook|hotmail|yahoo|proton|protonmail)\.(?:com|me)'''
+keywords = ["@gmail", "@googlemail", "@icloud", "@me.", "@outlook", "@hotmail", "@yahoo", "@proton"]
+
+[[allowlists]]
+description = "GitHub noreply commit identities"
+regexes = ['''users\.noreply\.github\.com''']

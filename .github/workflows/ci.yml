@@ -14,6 +14,9 @@ permissions:
   contents: read
 
 jobs:
+  leak-scan:
+    uses: ./.github/workflows/leak-scan.yml
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +36,7 @@ jobs:
           retention-days: 1
 
   deploy:
-    needs: build
+    needs: [build, leak-scan]
     # Skipped until the Google Cloud deploy identity is configured as repo variables.
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.GCP_WIF_PROVIDER != ''
     runs-on: ubuntu-latest
