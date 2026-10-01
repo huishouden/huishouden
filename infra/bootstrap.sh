@@ -99,10 +99,24 @@ for entry in "${APPS[@]}"; do
   fi
 done
 
+step "Auth authorized domains"
+# Firebase Auth only accepts sign-ins from listed domains. Needs Auth initialised (console step 1).
+AUTH_API="https://identitytoolkit.googleapis.com/admin/v2/projects/$PROJECT/config"
+auth_headers=(-H "Authorization: Bearer $(gcloud auth print-access-token)" -H "x-goog-user-project: $PROJECT")
+current=$(curl -s "${auth_headers[@]}" "$AUTH_API")
+if jq -e '.authorizedDomains' >/dev/null <<<"$current"; then
+  wanted=$(for entry in "${APPS[@]}"; do IFS=: read -r _ site _ <<<"$entry"; echo "$site.web.app"; done)
+  domains=$(jq -c --arg w "$wanted" '(.authorizedDomains + ($w | split("\n") | map(select(. != "")))) | unique' <<<"$current")
+  curl -s -X PATCH "${auth_headers[@]}" -H "Content-Type: application/json" \
+    "$AUTH_API?updateMask=authorizedDomains" -d "{\"authorizedDomains\": $domains}" | jq -c '.authorizedDomains'
+else
+  echo "Auth not initialised yet; do console step 1, then re-run."
+fi
+
 step "Done"
 cat <<EOF
 Manual steps the APIs don't cover (Firebase console, project $PROJECT):
-  1. Authentication > Sign-in method > Google > Enable
-  2. Authentication > Settings > Authorized domains > add each *.web.app site above
-  3. Google Auth Platform > Audience > Test users > add every household member's Google account
+  1. Authentication > Get started > Sign-in method > Google > Enable
+     (initialises Auth on the free plan and creates the OAuth web client; no supported API does either)
+  2. Google Auth Platform > Audience > Test users > add every household member's Google account
 EOF
