@@ -20,6 +20,6 @@ export const APPS: HouseholdApp[] = [
     description: 'Shared lists for the store and the house',
     url: 'https://huishouden-tasks.web.app/',
     icon: '🛒',
-    live: false,
+    live: true,
   },
 ];
