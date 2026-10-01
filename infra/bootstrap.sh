@@ -17,8 +17,10 @@ SA_NAME=github-deploy
 APPS=(
   "huishouden:huishouden-piekstra:"
   "household-spending:huishouden-spending:Spending"
-  "household-tasks:huishouden-tasks:Tasks"
 )
+# Other apps' repos are wired by whoever owns them; this script only manages the repos listed
+# above. The huishouden-tasks site and "Tasks" web app already exist in the project for the
+# tasks app to adopt.
 
 firebase() { npx --yes firebase-tools@14 "$@"; }
 step() { printf '\n== %s\n' "$*"; }
