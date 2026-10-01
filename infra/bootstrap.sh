@@ -24,10 +24,14 @@ firebase() { npx --yes firebase-tools@14 "$@"; }
 step() { printf '\n== %s\n' "$*"; }
 
 step "Firebase project $PROJECT"
-if gcloud projects describe "$PROJECT" >/dev/null 2>&1; then
-  echo "exists"
-else
-  firebase projects:create "$PROJECT" --display-name "Huishouden"
+if ! gcloud projects describe "$PROJECT" >/dev/null 2>&1; then
+  firebase projects:create "$PROJECT" --display-name "Huishouden" || true
+fi
+if ! firebase projects:list --json | jq -e --arg p "$PROJECT" '.result[] | select(.projectId == $p)' >/dev/null; then
+  gcloud services enable firebase.googleapis.com --project "$PROJECT"
+  # 403 here on a project you own means this Google account has not accepted the Firebase terms:
+  # open https://console.firebase.google.com, choose "Add project" > this project, accept, re-run.
+  firebase projects:addfirebase "$PROJECT"
 fi
 PROJECT_NUMBER=$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')
 
