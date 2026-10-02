@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/huishouden/portal/compare/v2.0.0...v2.1.0) (2026-10-02)
+
+
+### Features
+
+* the household's food preferences in the household panel ([#29](https://github.com/huishouden/portal/issues/29)) ([af5d753](https://github.com/huishouden/portal/commit/af5d75342f845ce1c54738c66b095868e89be051))
+
 ## [2.0.0](https://github.com/huishouden/portal/compare/v1.6.0...v2.0.0) (2026-10-02)
 
 
