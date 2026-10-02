@@ -21,6 +21,7 @@ import { agendaRange, watchAgenda, type AgendaItem } from '@huishouden/pwa-kit/a
 import { toYmd } from '@huishouden/pwa-kit/time';
 import { saveFood, watchFood, type FoodPreferences } from '@huishouden/pwa-kit/food';
 import { googleAccessMessage, readError } from '@huishouden/pwa-kit/feedback';
+import { track } from '@huishouden/pwa-kit/observability';
 import { DEFAULT_LAYOUT, parseLayout, type PortalLayout } from '../apps';
 import { auth, db, googleClientId } from '../firebase';
 import { rememberHousehold, rememberedHousehold } from '../memberHint';
@@ -218,6 +219,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         await createHousehold(db, email, name.slice(0, MAX_NAME)).catch((e) => {
           throw words(e, "Couldn't start the household");
         });
+        track('create household');
       },
       async renameHousehold(name) {
         const { id } = need();
@@ -231,6 +233,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         await inviteMember(db, id, address).catch((e) => {
           throw words(e, "Couldn't invite them");
         });
+        track('invite member');
         return {
           to: address,
           from: profiles.get(me)?.name ?? user?.displayName ?? me,
@@ -247,6 +250,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
       async sendInviteEmail(invitation) {
         try {
           await sendInviteEmail(auth, invitation);
+          track('send invite email');
         } catch (e) {
           throw new Error(googleAccessMessage(e, 'Gmail') ?? (e instanceof Error ? e.message : String(e)));
         }
@@ -257,6 +261,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         setLayout(next);
         try {
           await setDoc(doc(db, 'households', id, 'settings', 'portal'), { ...next, updatedAt: Date.now(), by: me });
+          track('arrange apps');
         } catch (e) {
           setLayout(previous);
           throw words(e, "Couldn't save the layout");
@@ -267,6 +272,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         await addContact(db, id, input, me).catch((e) => {
           throw words(e, "Couldn't add the contact");
         });
+        track('add contact');
       },
       async updateContact(contactId, input) {
         const { id, me } = need();
@@ -285,6 +291,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         await saveFood(db, id, input, me).catch((e) => {
           throw words(e, "Couldn't save the food preferences");
         });
+        track('save food preferences');
       },
       async restoreContact(contact) {
         const { id } = need();

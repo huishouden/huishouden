@@ -3,6 +3,10 @@ import { getAuth } from 'firebase/auth';
 import { firebaseConfigFromEnv } from '@huishouden/pwa-kit/firebase';
 import { initFirestore } from '@huishouden/pwa-kit/firestore';
 import { configureGoogleTokens } from '@huishouden/pwa-kit/google-token';
+import { startObservability } from '@huishouden/pwa-kit/observability';
+
+// Error, speed and anonymous usage reports (the /privacy page); off without VITE_NEWRELIC_*.
+startObservability({ app: 'portal', env: import.meta.env });
 
 // From VITE_FIREBASE_* build variables: CI sets them from repo variables; locally `bun run env:pull`.
 export const app = initializeApp(firebaseConfigFromEnv(import.meta.env));
