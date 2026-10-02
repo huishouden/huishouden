@@ -57,5 +57,14 @@
     "webApp": "Car",
     "glyph": "car",
     "tile": false
+  },
+  {
+    "name": "Bills",
+    "description": "What's due in the next month, read from your statement emails",
+    "repo": "bills",
+    "site": "huishouden-bills",
+    "webApp": "Bills",
+    "glyph": "card",
+    "tile": false
   }
 ]
