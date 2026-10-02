@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.0](https://github.com/huishouden/portal/compare/v2.2.1...v2.3.0) (2026-10-02)
+
+
+### Features
+
+* error, speed and anonymous usage reports (pwa-kit observability) ([#37](https://github.com/huishouden/portal/issues/37)) ([c4e21d3](https://github.com/huishouden/portal/commit/c4e21d33f3c1c67d2bf3240b282be2dba3f6a087))
+* **roles:** roles in the household panel; helpers see no money, settings or private contacts ([#40](https://github.com/huishouden/portal/issues/40)) ([965f687](https://github.com/huishouden/portal/commit/965f687212d79ec2c6f3b947f8c7681d65dae5a0))
+
 ## [2.2.1](https://github.com/huishouden/portal/compare/v2.2.0...v2.2.1) (2026-10-02)
 
 
