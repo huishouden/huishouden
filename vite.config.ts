@@ -24,7 +24,11 @@ export default defineConfig({
           { src: '/pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: { globPatterns: ['**/*.{js,css,html,svg,png}'] },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png}'],
+        // Firebase's reserved paths (/__/auth/handler for sign-in popups) must reach the network.
+        navigateFallbackDenylist: [/^\/__\//],
+      },
     }),
   ],
 });
