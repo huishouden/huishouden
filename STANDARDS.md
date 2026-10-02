@@ -12,6 +12,10 @@ and every household app follows them. This file adds what is specific to the hou
 - Firestore rules: the project's single rules file is deployed from `huishouden/rules`. Every app's
   blocks go there (spending's is `households/{householdId}/spendingTransactions`).
 - `authDomain`: `huishouden-piekstra.firebaseapp.com`.
+- Staging (pwa-kit STANDARD.md "Staging"): project `huishouden-staging`, sites
+  `huishouden-staging` (this portal) and `huishouden-staging-<app>`, invented data only. Same-repo
+  PRs deploy there and run their signed-in tests. Wiring: `bun run bootstrap:staging` (the same
+  `infra/apps.conf`, `STAGING_*` repo variables).
 
 ---
 
