@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/huishouden/portal/compare/v1.2.0...v1.3.0) (2026-10-02)
+
+
+### Features
+
+* the kit's Huishouden app bar replaces the header and account chip (kit v0.17.0) ([#11](https://github.com/huishouden/portal/issues/11)) ([83b4fe3](https://github.com/huishouden/portal/commit/83b4fe318739a13dab89f6bc7a93fb0b1f19120e))
+
 ## [1.2.0](https://github.com/huishouden/portal/compare/v1.1.0...v1.2.0) (2026-10-02)
 
 
