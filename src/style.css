@@ -45,12 +45,10 @@ a.tile:active { transform: scale(0.98); }
 a.tile:hover { box-shadow: 0 2px 4px rgb(0 0 0 / 0.08), 0 8px 24px rgb(27 67 50 / 0.14); }
 a.tile:focus-visible { outline: 3px solid var(--hh-terracotta); outline-offset: 3px; }
 
-.tile__icon { display: inline-flex; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 14px; background: var(--hh-forest-50); color: var(--hh-forest-700); margin-bottom: 8px; }
-.tile__icon svg { width: 26px; height: 26px; }
+.tile__icon { display: inline-flex; width: 56px; height: 56px; margin-bottom: 8px; }
+.tile__icon svg { width: 56px; height: 56px; }
 .tile__name { font-size: 1.375rem; font-weight: 650; color: var(--green); }
 .tile__desc { color: var(--muted); }
-
-.tile--soon { opacity: 0.55; }
 
 .panel {
   margin-top: 32px;

@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Huishouden",
+    "repo": "portal",
+    "site": "huishouden-piekstra",
+    "webApp": "Portal",
+    "glyph": "home",
+    "tile": false
+  },
+  {
+    "name": "Spending",
+    "description": "Card spending by month, category and card",
+    "repo": "spending",
+    "site": "huishouden-spending",
+    "webApp": "Spending",
+    "glyph": "card"
+  },
+  {
+    "name": "Tasks",
+    "description": "Groceries, chores and shared lists",
+    "repo": "tasks",
+    "site": "huishouden-tasks",
+    "glyph": "check",
+    "provision": false
+  },
+  {
+    "name": "Baby",
+    "description": "Feeds, sleep and diapers, appointments and checklists",
+    "repo": "baby",
+    "site": "huishouden-baby",
+    "webApp": "Baby",
+    "glyph": "bottle"
+  }
+]
