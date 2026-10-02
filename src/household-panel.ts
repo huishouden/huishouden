@@ -1,5 +1,5 @@
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
-import { forgetSilentSignIn, signInSilently } from '@piekstra/huishouden-pwa-kit/auth';
+import { forgetSilentSignIn, signInSilently } from '@huishouden/pwa-kit/auth';
 import {
   inviteMember,
   markJoined,
@@ -8,7 +8,7 @@ import {
   watchHousehold,
   type Household,
   type HouseholdState,
-} from '@piekstra/huishouden-pwa-kit/household';
+} from '@huishouden/pwa-kit/household';
 import { auth, db, googleClientId } from './firebase';
 
 /**

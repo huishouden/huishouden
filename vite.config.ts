@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { pwaApp } from '@piekstra/huishouden-pwa-kit/vite';
+import { pwaApp } from '@huishouden/pwa-kit/vite';
 
 export default defineConfig({
   plugins: [

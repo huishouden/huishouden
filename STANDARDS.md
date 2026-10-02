@@ -1,6 +1,6 @@
 # Household PWA standard
 
-The general rules live in [pwa-kit's STANDARD.md](https://github.com/piekstra/huishouden-pwa-kit/blob/main/STANDARD.md)
+The general rules live in [pwa-kit's STANDARD.md](https://github.com/huishouden/huishouden-pwa-kit/blob/main/STANDARD.md)
 and every household app follows them. This file adds what is specific to the household.
 
 ## Household specifics
@@ -21,7 +21,7 @@ judged rather than copied.
 
 ## Shape
 
-- **One repo per app**, under `piekstra/`. Its own CI, its own deploys.
+- **One repo per app**, under the `huishouden` GitHub org. Its own CI, its own deploys.
 - **One Firebase project for the household**: `huishouden-piekstra`. Each app gets its own
   Hosting site (`huishouden-<app>.web.app`) and its own Firebase web app registration.
   Unrelated or shareable projects get their own Firebase project instead.
@@ -62,7 +62,7 @@ Every app's `.github/workflows/ci.yml` has these jobs, all on `ubuntu-latest`:
 
 | Job | Runs on | Does |
 |---|---|---|
-| `leak-scan` | every PR and push | `piekstra/huishouden-pwa-kit/actions/leak-scan@v0` |
+| `leak-scan` | every PR and push | `huishouden/huishouden-pwa-kit/actions/leak-scan@v0` |
 | `build` | every PR and push | `bun install --frozen-lockfile`, lint (`tsc --noEmit`), unit tests, build |
 | `deploy` | push to `main` | Keyless via Workload Identity Federation; `firebase deploy --only hosting:<target>` |
 | `smoke` | after `deploy` | Playwright against the live site |

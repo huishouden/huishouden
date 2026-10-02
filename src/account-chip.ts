@@ -1,5 +1,5 @@
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { forgetSilentSignIn } from '@piekstra/huishouden-pwa-kit/auth';
+import { forgetSilentSignIn } from '@huishouden/pwa-kit/auth';
 import { auth } from './firebase';
 
 /**
