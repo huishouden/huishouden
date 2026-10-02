@@ -8,7 +8,7 @@ The household's front door: one installable PWA that opens the other household a
 | Spending | https://huishouden-spending.web.app | piekstra/household-spending |
 | Tasks & Groceries | https://huishouden-tasks.web.app | piekstra/household-tasks |
 
-Each app is its own repo and its own Firebase Hosting site in project `huishouden-piekstra`.
+Every app follows [STANDARDS.md](STANDARDS.md). Each app is its own repo and its own Firebase Hosting site in project `huishouden-piekstra`.
 Add or rename an app in `src/apps.ts`; set `live: true` once it is deployed.
 
 ## Develop
