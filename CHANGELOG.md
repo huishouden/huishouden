@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/huishouden/portal/compare/v1.4.0...v1.5.0) (2026-10-02)
+
+
+### Features
+
+* start a household, a first-run introduction, and renaming the household ([#17](https://github.com/huishouden/portal/issues/17)) ([746a197](https://github.com/huishouden/portal/commit/746a19744256bce149ae2a55587a92f87a76bfc1))
+
 ## [1.4.0](https://github.com/huishouden/portal/compare/v1.3.0...v1.4.0) (2026-10-02)
 
 
