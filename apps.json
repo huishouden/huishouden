@@ -9,7 +9,7 @@
   },
   {
     "name": "Spending",
-    "description": "Card spending by month, category and card",
+    "description": "Where the household's money goes",
     "repo": "spending",
     "site": "huishouden-spending",
     "webApp": "Spending",
@@ -17,7 +17,7 @@
   },
   {
     "name": "Tasks",
-    "description": "Groceries, chores and shared lists",
+    "description": "Shared lists and chores",
     "repo": "tasks",
     "site": "huishouden-tasks",
     "glyph": "check",
@@ -25,7 +25,7 @@
   },
   {
     "name": "Baby",
-    "description": "Feeds, sleep and diapers, appointments and checklists",
+    "description": "Looking after the little one, together",
     "repo": "baby",
     "site": "huishouden-baby",
     "webApp": "Baby",
@@ -33,7 +33,7 @@
   },
   {
     "name": "Pet",
-    "description": "Vet visits, medicines, reminders and records",
+    "description": "Looking after the pets, together",
     "repo": "pet",
     "site": "huishouden-pet",
     "webApp": "Pet",
@@ -42,25 +42,23 @@
   },
   {
     "name": "Home",
-    "description": "Upkeep schedule, service history and warranties",
+    "description": "Keeping the house in good shape",
     "repo": "home",
     "site": "huishouden-home",
     "webApp": "Home",
-    "glyph": "wrench",
-    "tile": false
+    "glyph": "wrench"
   },
   {
     "name": "Car",
-    "description": "Service, renewals and records for the cars",
+    "description": "Keeping the cars on the road",
     "repo": "car",
     "site": "huishouden-car",
     "webApp": "Car",
-    "glyph": "car",
-    "tile": false
+    "glyph": "car"
   },
   {
     "name": "Bills",
-    "description": "What's due in the next month, read from your statement emails",
+    "description": "What's due, and when",
     "repo": "bills",
     "site": "huishouden-bills",
     "webApp": "Bills",
