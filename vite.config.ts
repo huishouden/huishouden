@@ -5,7 +5,8 @@ export default defineConfig({
   plugins: [
     pwaApp({
       name: 'Huishouden',
-      description: 'One home screen for the household apps: spending, tasks and groceries.',
+      description: "Your household's apps, together in one place",
+      url: 'https://huishouden-piekstra.web.app',
       themeColor: '#1b4332',
       backgroundColor: '#faf9f5',
     }),
