@@ -1,6 +1,8 @@
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
 import { forgetSilentSignIn, signInSilently } from '@huishouden/pwa-kit/auth';
 import {
+  createHousehold,
   inviteMember,
   markJoined,
   normalizeEmail,
@@ -8,186 +10,181 @@ import {
   saveMyProfile,
   watchHousehold,
   watchProfiles,
-  type Household,
   type HouseholdState,
   type Profile,
 } from '@huishouden/pwa-kit/household';
-import { inviteMailto, sendInviteEmail, type Invitation } from '@huishouden/pwa-kit/invite';
+import { sendInviteEmail, type Invitation } from '@huishouden/pwa-kit/invite';
 import { auth, db, googleClientId } from './firebase';
+import { MAX_NAME, type HhHousehold, type PanelMessage, type PanelView } from './household-view';
+
+/** "Sam's household" from a Google name of "Sam Example"; a plain fallback without one. */
+export function suggestedHouseholdName(displayName: string | null | undefined): string {
+  const first = displayName?.trim().split(/\s+/)[0];
+  return first ? `${first}'s household` : 'Our household';
+}
 
 /**
- * The household panel: who is in the household, who is invited, and inviting more. Membership here
- * is what every household app checks, so an invite opens all of them at once.
+ * The household panel: starting a household, who is in it, and inviting more. Membership here is
+ * what every household app checks, so an invite opens all of them at once. This module wires sign-in
+ * and Firestore to the `<hh-household>` view (src/household-view.ts).
  */
-export function mountHouseholdPanel(root: HTMLElement) {
+export function mountHouseholdPanel(panel: HhHousehold) {
+  let user: User | null = null;
+  let state: HouseholdState = { status: 'loading' };
+  let profiles = new Map<string, Profile>();
+  let invited: Invitation | undefined;
+  let sending = false;
+  let creating = false;
+  let focusInvite = false;
+  let message: PanelMessage | undefined;
   let stopWatching: (() => void) | undefined;
   let stopProfiles: (() => void) | undefined;
-  let profiles = new Map<string, Profile>();
-  let last: { user: User; state: HouseholdState } | undefined;
-  /** The invitation just made, offered for sending by email until dismissed. */
-  let justInvited: Invitation | undefined;
 
-  const render = (html: string) => (root.innerHTML = html);
-  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-
-  function renderSignedOut() {
-    render(`
-      <h2>Household</h2>
-      <p class="muted">Sign in to see who's in the household and invite others.</p>
-      <button class="hh-button" id="hh-sign-in">Sign in with Google</button>`);
-    root.querySelector('#hh-sign-in')!.addEventListener('click', () => {
-      signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => showError(e));
-    });
-  }
-
-  function renderState(user: User, state: HouseholdState) {
-    const me = normalizeEmail(user.email ?? '');
-    const footer = `<p class="muted small">Signed in as ${esc(me)} · <button class="link" id="hh-sign-out">Sign out</button></p>`;
-    if (state.status === 'loading') return render(`<h2>Household</h2><p class="muted">Loading…</p>${footer}`);
-    if (state.status === 'error') return render(`<h2>Household</h2><p class="error">${esc(state.error.message)}</p>${footer}`);
+  function compose(): PanelView {
+    if (!user?.email) return { status: 'signed-out', message };
+    const me = normalizeEmail(user.email);
+    if (state.status === 'loading') return { status: 'loading', me };
+    if (state.status === 'error') return { status: 'error', me, error: state.error.message };
     if (state.status === 'none') {
-      return render(`
-        <h2>Household</h2>
-        <p>You're not in a household yet. Ask a member to invite <strong>${esc(me)}</strong> here.</p>${footer}`);
+      return { status: 'none', me, suggestedName: suggestedHouseholdName(user.displayName), creating, message };
     }
-    const h = state.household;
-    const typed = (root.querySelector<HTMLInputElement>('#hh-invite input')?.value) ?? '';
-    render(`
-      <h2>${esc(h.name)}</h2>
-      <ul class="members">
-        ${h.members
-          .map((m) => {
-            const joined = h.joined.includes(m);
-            const self = m === me;
-            const p = profiles.get(m);
-            const avatar = p?.photoURL
-              ? `<img class="hh-avatar" src="${esc(p.photoURL)}" alt="" referrerpolicy="no-referrer" />`
-              : `<span class="hh-avatar member__initial" aria-hidden="true">${esc((p?.name ?? m).charAt(0).toUpperCase())}</span>`;
-            return `<li>
-              ${avatar}
-              <span class="member">
-                <span class="member__name">${esc(p?.name ?? m)}${self ? ' <span class="muted">(you)</span>' : ''}</span>
-                ${p?.name ? `<span class="member__email muted small">${esc(m)}</span>` : ''}
-              </span>
-              <span class="badge ${joined ? 'badge--joined' : 'badge--invited'}">${joined ? 'Signed in' : 'Invited'}</span>
-              ${self ? '' : `<button class="link" data-remove="${esc(m)}">Remove</button>`}
-            </li>`;
-          })
-          .join('')}
-      </ul>
-      ${
-        justInvited
-          ? `<div class="invite-sent" role="status">
-              <p>${esc(justInvited.to)} is invited. Let them know by email:</p>
-              <div class="invite-sent__actions">
-                <button class="hh-button" id="hh-send-invite">Send invite email</button>
-                <a class="link" href="${esc(inviteMailto(justInvited))}">Write it in my mail app</a>
-                <button class="link" id="hh-dismiss-invite">Not now</button>
-              </div>
-              <p class="muted small">Sent from your Gmail. Google asks once to let Huishouden send email; it only sends invitations.</p>
-            </div>`
-          : ''
-      }
-      <form id="hh-invite" class="invite">
-        <input type="email" name="email" placeholder="Their Google account email" required autocomplete="off" />
-        <button class="hh-button" type="submit">Invite</button>
-      </form>
-      <p class="muted small">An invite gives them every household app the next time they sign in with that account.</p>
-      ${footer}`);
-    root.querySelector<HTMLInputElement>('#hh-invite input')!.value = typed;
-    root.querySelector('#hh-send-invite')?.addEventListener('click', async (e) => {
-      const button = e.currentTarget as HTMLButtonElement;
-      button.disabled = true;
-      button.textContent = 'Sending…';
+    return {
+      status: 'ready',
+      me,
+      household: state.household,
+      profiles: Object.fromEntries(profiles),
+      invited,
+      sending,
+      focusInvite,
+      message,
+    };
+  }
+
+  function update() {
+    const view = compose();
+    panel.view = view;
+    if (view.status === 'ready') focusInvite = false;
+  }
+
+  /** Runs a household action, showing its error (or a notice) in the panel. */
+  async function act(run: () => Promise<void>, notice?: string) {
+    message = undefined;
+    try {
+      await run();
+      if (notice) message = { kind: 'notice', text: notice };
+    } catch (e) {
+      message = { kind: 'error', text: e instanceof Error ? e.message : String(e) };
+    }
+    update();
+  }
+
+  const householdId = () => (state.status === 'ready' ? state.household.id : undefined);
+
+  panel.addEventListener('hh-sign-in', () => {
+    signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => {
+      const code = (e as { code?: string }).code;
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
+      message = { kind: 'error', text: e instanceof Error ? e.message : String(e) };
+      update();
+    });
+  });
+
+  panel.addEventListener('hh-sign-out', async () => {
+    await forgetSilentSignIn();
+    await signOut(auth);
+  });
+
+  panel.addEventListener('hh-create', (e) => {
+    const name = (e as CustomEvent<string>).detail.slice(0, MAX_NAME);
+    if (!user?.email || creating) return;
+    const email = user.email;
+    creating = true;
+    update();
+    void act(async () => {
       try {
-        await sendInviteEmail(auth, justInvited!);
-        justInvited = undefined;
-        rerender();
-        showNotice('Invite email sent.');
+        await createHousehold(db, email, name);
+        // The watch turns ready once the server has the household; land on the invite field then.
+        focusInvite = true;
       } catch (err) {
-        button.disabled = false;
-        button.textContent = 'Send invite email';
-        showError(err);
+        creating = false;
+        throw err;
       }
     });
-    root.querySelector('#hh-dismiss-invite')?.addEventListener('click', () => {
-      justInvited = undefined;
-      rerender();
+  });
+
+  panel.addEventListener('hh-rename', (e) => {
+    const id = householdId();
+    const name = (e as CustomEvent<string>).detail.slice(0, MAX_NAME);
+    if (id) void act(() => updateDoc(doc(db, 'households', id), { name }));
+  });
+
+  panel.addEventListener('hh-invite', (e) => {
+    const id = householdId();
+    if (!id || state.status !== 'ready' || !user?.email) return;
+    const to = normalizeEmail((e as CustomEvent<string>).detail);
+    const me = normalizeEmail(user.email);
+    const from = profiles.get(me)?.name ?? user.displayName ?? me;
+    const householdName = state.household.name;
+    void act(async () => {
+      await inviteMember(db, id, to);
+      panel.clearInvite();
+      invited = { to, from, householdName, url: location.origin };
     });
-    root.querySelectorAll<HTMLButtonElement>('[data-remove]').forEach((b) =>
-      b.addEventListener('click', () => {
-        const email = b.dataset.remove!;
-        if (confirm(`Remove ${email} from ${h.name}? They lose access to every household app.`)) {
-          removeMember(db, h.id, email).catch(showError);
-        }
-      }),
-    );
-    root.querySelector<HTMLFormElement>('#hh-invite')!.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = (e.currentTarget as HTMLFormElement).elements.namedItem('email') as HTMLInputElement;
-      const to = normalizeEmail(input.value);
-      inviteMember(db, h.id, to)
-        .then(() => {
-          input.value = '';
-          const self = profiles.get(me);
-          justInvited = { to, from: self?.name ?? user.displayName ?? me, householdName: h.name, url: location.origin };
-          rerender();
-        })
-        .catch(showError);
-    });
-    bindSignOut();
-  }
+  });
 
-  function bindSignOut() {
-    root.querySelector('#hh-sign-out')?.addEventListener('click', async () => {
-      await forgetSilentSignIn();
-      await signOut(auth);
-    });
-  }
+  panel.addEventListener('hh-remove', (e) => {
+    const id = householdId();
+    if (id) void act(() => removeMember(db, id, (e as CustomEvent<string>).detail));
+  });
 
-  function rerender() {
-    if (last) renderState(last.user, last.state);
-    bindSignOut();
-  }
+  panel.addEventListener('hh-send-invite', () => {
+    if (!invited || sending) return;
+    const invitation = invited;
+    sending = true;
+    update();
+    void act(async () => {
+      try {
+        await sendInviteEmail(auth, invitation);
+        invited = undefined;
+      } finally {
+        sending = false;
+      }
+    }, 'Invite email sent.');
+  });
 
-  function showNotice(text: string) {
-    const p = document.createElement('p');
-    p.className = 'notice';
-    p.setAttribute('role', 'status');
-    p.textContent = text;
-    root.appendChild(p);
-  }
+  panel.addEventListener('hh-dismiss-invite', () => {
+    invited = undefined;
+    update();
+  });
 
-  function showError(e: unknown) {
-    const p = document.createElement('p');
-    p.className = 'error';
-    p.textContent = e instanceof Error ? e.message : String(e);
-    root.appendChild(p);
-  }
-
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, (next) => {
     stopWatching?.();
     stopProfiles?.();
     stopWatching = stopProfiles = undefined;
+    user = next;
+    state = { status: 'loading' };
     profiles = new Map();
-    justInvited = undefined;
-    if (!user?.email) return renderSignedOut();
-    const email = user.email;
-    let householdId: string | undefined;
-    stopWatching = watchHousehold(db, email, (state) => {
-      last = { user, state };
-      rerender();
-      if (state.status !== 'ready') return;
-      const household = state.household as Household;
+    invited = undefined;
+    sending = creating = focusInvite = false;
+    message = undefined;
+    if (!next?.email) return update();
+    const email = next.email;
+    let watchedId: string | undefined;
+    stopWatching = watchHousehold(db, email, (s) => {
+      state = s;
+      if (s.status !== 'none') creating = false;
+      update();
+      if (s.status !== 'ready') return;
+      const household = s.household;
       void markJoined(db, household, email).catch(() => {});
-      if (household.id === householdId) return;
-      householdId = household.id;
+      if (household.id === watchedId) return;
+      watchedId = household.id;
       stopProfiles?.();
       // Members' names and photos come from their own sign-ins; record ours for the others.
-      void saveMyProfile(db, household.id, user).catch(() => {});
-      stopProfiles = watchProfiles(db, household.id, (next) => {
-        profiles = next;
-        rerender();
+      void saveMyProfile(db, household.id, next).catch(() => {});
+      stopProfiles = watchProfiles(db, household.id, (p) => {
+        profiles = p;
+        update();
       });
     });
   });

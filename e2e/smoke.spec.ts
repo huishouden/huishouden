@@ -24,3 +24,16 @@ test('the app bar offers Google sign-in that reaches Google', ({ page, context }
   expectGoogleSignInPopup(page, context, async (p) => {
     await p.locator('hh-app-bar').getByRole('button', { name: 'Sign in with Google' }).click();
   }));
+
+test('signed out, the household panel explains Huishouden and how to start', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const panel = page.locator('#household');
+  await expect(panel.getByRole('heading', { name: 'Simple shared apps for running a home together' })).toBeVisible();
+  await expect(panel.getByText("It's free.", { exact: false })).toBeVisible();
+  await expect(panel.getByText("A household's information is visible only to its members.")).toBeVisible();
+  await expect(panel.getByRole('listitem')).toHaveText([
+    'Sign in with your Google account.',
+    'Start a household, or join the one you were invited to.',
+    'Open any app. Add it to your home screen to keep it close.',
+  ]);
+});
