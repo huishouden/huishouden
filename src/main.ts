@@ -1,6 +1,8 @@
 import { registerSW } from 'virtual:pwa-register';
 import { APPS } from './apps';
+import '@piekstra/pwa-kit/theme.css';
 import './style.css';
+import { mountHouseholdPanel } from './household-panel';
 
 registerSW({ immediate: true });
 
@@ -34,3 +36,5 @@ for (const app of APPS) {
   tile.append(icon, name, desc);
   nav.append(tile);
 }
+
+mountHouseholdPanel(document.getElementById('household')!);

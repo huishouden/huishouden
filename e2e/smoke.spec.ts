@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectCleanLoad, expectInstallable } from '@piekstra/pwa-kit/e2e';
+import { expectCleanLoad, expectGoogleSignInPopup, expectInstallable } from '@piekstra/pwa-kit/e2e';
 
 test('loads without runtime errors and links every live app', async ({ page }) => {
   await expectCleanLoad(page);
@@ -10,3 +10,8 @@ test('loads without runtime errors and links every live app', async ({ page }) =
 });
 
 test('is installable', ({ page, request }) => expectInstallable(page, request));
+
+test('household panel offers Google sign-in that reaches Google', ({ page, context }) =>
+  expectGoogleSignInPopup(page, context, async (p) => {
+    await p.getByRole('button', { name: 'Sign in with Google' }).click();
+  }));
