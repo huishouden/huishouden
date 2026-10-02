@@ -91,8 +91,9 @@ for entry in "${APPS[@]}"; do
     # Web SDK config is public by design (it ships in the bundle); access is enforced by Auth and rules.
     config=$(firebase apps:sdkconfig WEB "$app_id" --project "$PROJECT" --json | jq '.result.sdkConfig')
     gh variable set VITE_FIREBASE_API_KEY --repo "$GITHUB_OWNER/$repo" --body "$(jq -r .apiKey <<<"$config")"
-    # Auth popups run on the app's own domain so they keep working when browsers block third-party storage.
-    gh variable set VITE_FIREBASE_AUTH_DOMAIN --repo "$GITHUB_OWNER/$repo" --body "$site.web.app"
+    # The project's default auth domain is the only redirect URI the auto-created OAuth client allows;
+    # using the app's own domain needs its /__/auth/handler added to that client in the console.
+    gh variable set VITE_FIREBASE_AUTH_DOMAIN --repo "$GITHUB_OWNER/$repo" --body "$PROJECT.firebaseapp.com"
     gh variable set VITE_FIREBASE_PROJECT_ID --repo "$GITHUB_OWNER/$repo" --body "$PROJECT"
     gh variable set VITE_FIREBASE_APP_ID --repo "$GITHUB_OWNER/$repo" --body "$app_id"
     gh variable set VITE_FIREBASE_MESSAGING_SENDER_ID --repo "$GITHUB_OWNER/$repo" --body "$(jq -r .messagingSenderId <<<"$config")"
