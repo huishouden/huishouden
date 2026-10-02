@@ -8,8 +8,8 @@ _Screenshot of the live site, refreshed by CI after each deploy._
 
 | App | URL | Repo |
 |---|---|---|
-| Huishouden (this) | https://huishouden-piekstra.web.app | huishouden/huishouden |
-| Spending | https://huishouden-spending.web.app | huishouden/huishouden-spending |
+| Huishouden (this) | https://huishouden-piekstra.web.app | huishouden/portal |
+| Spending | https://huishouden-spending.web.app | huishouden/spending |
 | Tasks & Groceries | https://huishouden-tasks.web.app | piekstra/huishouden-tasks |
 
 Every app follows [STANDARDS.md](STANDARDS.md). Each app is its own repo and its own Firebase Hosting site in project `huishouden-piekstra`.

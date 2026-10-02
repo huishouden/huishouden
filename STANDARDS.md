@@ -1,6 +1,6 @@
 # Household PWA standard
 
-The general rules live in [pwa-kit's STANDARD.md](https://github.com/huishouden/huishouden-pwa-kit/blob/main/STANDARD.md)
+The general rules live in [pwa-kit's STANDARD.md](https://github.com/huishouden/pwa-kit/blob/main/STANDARD.md)
 and every household app follows them. This file adds what is specific to the household.
 
 ## Household specifics
@@ -62,7 +62,7 @@ Every app's `.github/workflows/ci.yml` has these jobs, all on `ubuntu-latest`:
 
 | Job | Runs on | Does |
 |---|---|---|
-| `leak-scan` | every PR and push | `huishouden/huishouden-pwa-kit/actions/leak-scan@v0` |
+| `leak-scan` | every PR and push | `huishouden/pwa-kit/actions/leak-scan@v0` |
 | `build` | every PR and push | `bun install --frozen-lockfile`, lint (`tsc --noEmit`), unit tests, build |
 | `deploy` | push to `main` | Keyless via Workload Identity Federation; `firebase deploy --only hosting:<target>` |
 | `smoke` | after `deploy` | Playwright against the live site |
