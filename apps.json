@@ -8,14 +8,6 @@
     "tile": false
   },
   {
-    "name": "Spending",
-    "description": "Where the household's money goes",
-    "repo": "spending",
-    "site": "huishouden-spending",
-    "webApp": "Spending",
-    "glyph": "card"
-  },
-  {
     "name": "Tasks",
     "description": "Shared lists and chores",
     "repo": "tasks",
@@ -24,12 +16,12 @@
     "provision": false
   },
   {
-    "name": "Baby",
-    "description": "Looking after the little one, together",
-    "repo": "baby",
-    "site": "huishouden-baby",
-    "webApp": "Baby",
-    "glyph": "bottle"
+    "name": "Home",
+    "description": "Keeping the house in good shape",
+    "repo": "home",
+    "site": "huishouden-home",
+    "webApp": "Home",
+    "glyph": "wrench"
   },
   {
     "name": "Pet",
@@ -38,14 +30,6 @@
     "site": "huishouden-pet",
     "webApp": "Pet",
     "glyph": "paw"
-  },
-  {
-    "name": "Home",
-    "description": "Keeping the house in good shape",
-    "repo": "home",
-    "site": "huishouden-home",
-    "webApp": "Home",
-    "glyph": "wrench"
   },
   {
     "name": "Car",
@@ -62,5 +46,21 @@
     "site": "huishouden-bills",
     "webApp": "Bills",
     "glyph": "card"
+  },
+  {
+    "name": "Spending",
+    "description": "Where the household's money goes",
+    "repo": "spending",
+    "site": "huishouden-spending",
+    "webApp": "Spending",
+    "glyph": "card"
+  },
+  {
+    "name": "Baby",
+    "description": "Looking after the little one, together",
+    "repo": "baby",
+    "site": "huishouden-baby",
+    "webApp": "Baby",
+    "glyph": "bottle"
   }
 ]

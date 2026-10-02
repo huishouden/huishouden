@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
+    "test": "bun test src",
     "icons": "pwa-icons",
     "e2e": "playwright test e2e/smoke.spec.ts",
     "prepare": "git config core.hooksPath .githooks",

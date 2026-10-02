@@ -1,0 +1,20 @@
+{
+  "saved": {
+    "order": ["pet", "tasks", "home", "car", "bills", "spending", "baby"],
+    "hidden": ["baby", "spending"],
+    "updatedAt": 1790000000000,
+    "by": "sam@example.com"
+  },
+  "beforeNewApps": {
+    "order": ["home", "tasks"],
+    "hidden": [],
+    "updatedAt": 1790000000000,
+    "by": "sam@example.com"
+  },
+  "malformed": {
+    "order": ["home", 7, "", "home", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "retired-app"],
+    "hidden": "baby",
+    "updatedAt": 1790000000000,
+    "by": "sam@example.com"
+  }
+}

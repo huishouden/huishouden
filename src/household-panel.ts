@@ -17,6 +17,7 @@ import { sendInviteEmail, type Invitation } from '@huishouden/pwa-kit/invite';
 import { googleAccessMessage } from '@huishouden/pwa-kit/feedback';
 import { auth, db, googleClientId } from './firebase';
 import { MAX_NAME, type HhHousehold, type PanelMessage, type PanelView } from './household-view';
+import type { TilesHousehold } from './tiles-panel';
 
 /** "Sam's household" from a Google name of "Sam Example"; a plain fallback without one. */
 export function suggestedHouseholdName(displayName: string | null | undefined): string {
@@ -27,9 +28,10 @@ export function suggestedHouseholdName(displayName: string | null | undefined): 
 /**
  * The household panel: starting a household, who is in it, and inviting more. Membership here is
  * what every household app checks, so an invite opens all of them at once. This module wires sign-in
- * and Firestore to the `<hh-household>` view (src/household-view.ts).
+ * and Firestore to the `<hh-household>` view (src/household-view.ts). `onHousehold` hears which
+ * household the signed-in member is in (null for none or signed out, undefined while loading).
  */
-export function mountHouseholdPanel(panel: HhHousehold) {
+export function mountHouseholdPanel(panel: HhHousehold, onHousehold?: (household: TilesHousehold | undefined) => void) {
   let user: User | null = null;
   let state: HouseholdState = { status: 'loading' };
   let profiles = new Map<string, Profile>();
@@ -65,6 +67,7 @@ export function mountHouseholdPanel(panel: HhHousehold) {
     const view = compose();
     panel.view = view;
     if (view.status === 'ready') focusInvite = false;
+    onHousehold?.(view.status === 'ready' ? { id: view.household.id, me: view.me } : view.status === 'loading' ? undefined : null);
   }
 
   /** Runs a household action, showing its error (or a notice) in the panel. */
