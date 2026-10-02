@@ -51,9 +51,8 @@ judged rather than copied.
 - The OAuth consent screen is In production, External. Asking for sensitive scopes (Sheets,
   Drive) shows "unverified app" once per user and counts toward a lifetime cap of 100 users.
   Prefer designs that need no Google API scopes in the browser.
-- Household data lives in Firestore in the shared project, one top-level collection per app.
-  Security rules allow only the household's accounts. The rules file lives in one place
-  (this repo) because one project has one rules file.
+- Household data lives in Firestore in the shared project, under `households/{householdId}/<collection>`
+  per app. The project's single rules file is deployed from `household-tasks` (see above).
 - Card names, people and other household facts are data, not code: keep them in the Sheet or
   Firestore, not in the repo (the repos may be published).
 
@@ -63,7 +62,7 @@ Every app's `.github/workflows/ci.yml` has these jobs, all on `ubuntu-latest`:
 
 | Job | Runs on | Does |
 |---|---|---|
-| `leak-scan` | every PR and push | `uses: piekstra/huishouden/.github/workflows/leak-scan.yml@main` |
+| `leak-scan` | every PR and push | `piekstra/pwa-kit/actions/leak-scan@v0` |
 | `build` | every PR and push | `bun install --frozen-lockfile`, lint (`tsc --noEmit`), unit tests, build |
 | `deploy` | push to `main` | Keyless via Workload Identity Federation; `firebase deploy --only hosting:<target>` |
 | `smoke` | after `deploy` | Playwright against the live site |
