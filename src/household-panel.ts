@@ -14,6 +14,7 @@ import {
   type Profile,
 } from '@huishouden/pwa-kit/household';
 import { sendInviteEmail, type Invitation } from '@huishouden/pwa-kit/invite';
+import { googleAccessMessage } from '@huishouden/pwa-kit/feedback';
 import { auth, db, googleClientId } from './firebase';
 import { MAX_NAME, type HhHousehold, type PanelMessage, type PanelView } from './household-view';
 
@@ -146,6 +147,8 @@ export function mountHouseholdPanel(panel: HhHousehold) {
       try {
         await sendInviteEmail(auth, invitation);
         invited = undefined;
+      } catch (e) {
+        throw new Error(googleAccessMessage(e, 'Gmail') ?? (e instanceof Error ? e.message : String(e)));
       } finally {
         sending = false;
       }
