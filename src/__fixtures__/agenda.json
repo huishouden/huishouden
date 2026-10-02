@@ -1,0 +1,17 @@
+{
+  "now": "2026-10-01T09:00:00",
+  "items": [
+    { "id": "a1", "app": "home", "ref": "job:gutters", "kind": "due", "title": "Gutter cleaning", "start": "2026-09-27T00:00", "allDay": true, "status": "upcoming" },
+    { "id": "a2", "app": "home", "ref": "job:hvac", "kind": "due", "title": "HVAC filter", "start": "2026-10-20T00:00", "allDay": true, "status": "upcoming" },
+    { "id": "a3", "app": "pet", "ref": "appt:checkup", "kind": "appointment", "title": "Yearly checkup", "start": "2026-10-01T15:30", "end": "2026-10-01T16:15", "allDay": false },
+    { "id": "a4", "app": "pet", "ref": "med:heartworm", "kind": "medicine", "title": "Heartworm chew", "start": "2026-09-30T19:00", "allDay": false, "status": "done" },
+    { "id": "a5", "app": "car", "ref": "appt:service", "kind": "appointment", "title": "Service", "start": "2026-09-30T10:00", "allDay": false },
+    { "id": "a6", "app": "bills", "ref": "bill:netflix", "kind": "bill", "title": "Netflix", "start": "2026-10-06T00:00", "allDay": true, "status": "upcoming" },
+    { "id": "a7", "app": "retired", "ref": "x", "kind": "other", "title": "From an app no longer listed", "start": "2026-10-02T00:00", "allDay": true }
+  ],
+  "expected": [
+    { "app": "home", "overdue": 1, "week": 0 },
+    { "app": "pet", "overdue": 0, "week": 1 },
+    { "app": "bills", "overdue": 0, "week": 1 }
+  ]
+}

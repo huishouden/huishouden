@@ -13,6 +13,8 @@ export interface RegistryEntry {
   tile?: boolean;
   /** False when another session wires the app's hosting and deploys. */
   provision?: boolean;
+  /** The roles the app offers for household contacts, when it shows contacts. */
+  contactRoles?: string[];
 }
 
 export interface HouseholdApp {
@@ -23,6 +25,8 @@ export interface HouseholdApp {
   url: string;
   /** The app's own family logo, so the tile matches its installed icon. */
   icon: string;
+  /** Roles the app offers for contacts; empty when it doesn't show contacts. */
+  contactRoles: string[];
 }
 
 export function tilesFrom(entries: RegistryEntry[]): HouseholdApp[] {
@@ -34,6 +38,7 @@ export function tilesFrom(entries: RegistryEntry[]): HouseholdApp[] {
       description: app.description ?? '',
       url: `https://${app.site}.web.app/`,
       icon: logoSvg(app.glyph),
+      contactRoles: app.contactRoles ?? [],
     }));
 }
 
