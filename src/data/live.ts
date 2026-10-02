@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
-import { doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { setDoc, updateDoc } from '@huishouden/pwa-kit/firestore';
 import { forgetSilentSignIn, signInSilently } from '@huishouden/pwa-kit/auth';
 import {
   createHousehold,
