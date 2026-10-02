@@ -11,12 +11,12 @@
     "icons": "pwa-icons",
     "e2e": "playwright test e2e/smoke.spec.ts",
     "prepare": "git config core.hooksPath .githooks",
-    "bootstrap": "node_modules/@piekstra/huishouden-pwa-kit/infra/bootstrap.sh infra/apps.conf",
+    "bootstrap": "node_modules/@huishouden/pwa-kit/infra/bootstrap.sh infra/apps.conf",
     "screenshots": "playwright test e2e/screenshots.spec.ts",
     "env:pull": "gh variable list --json name,value -q '.[] | select(.name|startswith(\"VITE_\")) | \"\\(.name)=\\(.value)\"' > .env.local && echo 'wrote .env.local'"
   },
   "devDependencies": {
-    "@piekstra/huishouden-pwa-kit": "github:piekstra/huishouden-pwa-kit#v0.8.1",
+    "@huishouden/pwa-kit": "github:huishouden/huishouden-pwa-kit#v0.11.0",
     "@playwright/test": "^1.63.0",
     "@types/bun": "^1.4.2",
     "sharp": "^0.35.5",

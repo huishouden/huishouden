@@ -1,6 +1,6 @@
 import { registerSW } from 'virtual:pwa-register';
 import { APPS } from './apps';
-import '@piekstra/huishouden-pwa-kit/theme.css';
+import '@huishouden/pwa-kit/theme.css';
 import './style.css';
 import { mountHouseholdPanel } from './household-panel';
 import { mountAccountChip } from './account-chip';
