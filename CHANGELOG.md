@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/huishouden/portal/compare/v1.0.0...v1.1.0) (2026-10-02)
+
+
+### Features
+
+* one app registry (apps.json) for portal tiles and bootstrap; Baby appears in the portal ([#5](https://github.com/huishouden/portal/issues/5)) ([c7c9d3c](https://github.com/huishouden/portal/commit/c7c9d3c58e836149bdb91367c519bdeba06f28d7))
+
 ## 1.0.0 (2026-10-02)
 
 
