@@ -1,6 +1,6 @@
 import { registerSW } from 'virtual:pwa-register';
 import { APPS } from './apps';
-import '@piekstra/pwa-kit/theme.css';
+import '@piekstra/huishouden-pwa-kit/theme.css';
 import './style.css';
 import { mountHouseholdPanel } from './household-panel';
 import { mountAccountChip } from './account-chip';
@@ -24,7 +24,7 @@ for (const app of APPS) {
   const icon = document.createElement('span');
   icon.className = 'tile__icon';
   icon.setAttribute('aria-hidden', 'true');
-  icon.textContent = app.icon;
+  icon.innerHTML = app.icon; // trusted: static SVG from src/apps.ts
 
   const name = document.createElement('span');
   name.className = 'tile__name';

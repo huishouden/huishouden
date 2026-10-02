@@ -8,7 +8,7 @@
         "firebase": "^12",
       },
       "devDependencies": {
-        "@piekstra/pwa-kit": "github:piekstra/pwa-kit#v0.5.1",
+        "@piekstra/huishouden-pwa-kit": "github:piekstra/huishouden-pwa-kit#v0.8.0",
         "@playwright/test": "^1.63.0",
         "@types/bun": "^1.4.2",
         "sharp": "^0.35.5",
@@ -369,7 +369,7 @@
 
     "@oxc-project/types": ["@oxc-project/types@0.152.0", "", {}, "sha512-oM/5rLBm2tPkg0iBgkH/FOeR3PCDpY19GTgAZjMFM8h9WI9VW7cLgzp6nwtarYKmovavIQZ+Fe/RKX/8C8O/Rw=="],
 
-    "@piekstra/pwa-kit": ["@piekstra/pwa-kit@github:piekstra/pwa-kit#ca7192c", { "peerDependencies": { "@playwright/test": ">=1.45", "firebase": ">=11", "sharp": ">=0.33", "vite-plugin-pwa": ">=1.0" }, "optionalPeers": ["@playwright/test", "firebase", "sharp"], "bin": { "pwa-icons": "./scripts/icons.ts" } }, "piekstra-pwa-kit-ca7192c"],
+    "@piekstra/huishouden-pwa-kit": ["@piekstra/huishouden-pwa-kit@github:piekstra/huishouden-pwa-kit#a8aed5b", { "peerDependencies": { "@playwright/test": ">=1.45", "firebase": ">=11", "sharp": ">=0.33", "vite-plugin-pwa": ">=1.0" }, "optionalPeers": ["@playwright/test", "firebase", "sharp"], "bin": { "pwa-icons": "./scripts/icons.ts", "pwa-design-check": "./scripts/design-check.ts", "pwa-logo": "./scripts/logo.ts" } }, "piekstra-huishouden-pwa-kit-a8aed5b"],
 
     "@playwright/test": ["@playwright/test@1.63.0", "", { "dependencies": { "playwright": "1.63.0" }, "bin": { "playwright": "cli.js" } }, "sha512-oxMK4vllB9RK5NQ2l1pq1IfOf2AvnEuj/vYGDj0H2nMtmtZpKtCwt/l00GEO6xjGfpBNAvjovvYdCm50dRQkpQ=="],
 
