@@ -18,6 +18,7 @@ import { addContact, deleteContact, restoreContact, updateContact, watchContacts
 import { sendInviteEmail } from '@huishouden/pwa-kit/invite';
 import { agendaRange, watchAgenda, type AgendaItem } from '@huishouden/pwa-kit/agenda';
 import { toYmd } from '@huishouden/pwa-kit/time';
+import { saveFood, watchFood, type FoodPreferences } from '@huishouden/pwa-kit/food';
 import { googleAccessMessage, readError } from '@huishouden/pwa-kit/feedback';
 import { DEFAULT_LAYOUT, parseLayout, type PortalLayout } from '../apps';
 import { auth, db, googleClientId } from '../firebase';
@@ -70,6 +71,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
   const [layout, setLayout] = useState<PortalLayout | undefined>(cachedLayout);
   const [contacts, setContacts] = useState<Contact[] | undefined>(undefined);
   const [agenda, setAgenda] = useState<AgendaItem[] | undefined>(undefined);
+  const [food, setFood] = useState<FoodPreferences | undefined>(undefined);
   const today = useToday();
 
   useEffect(
@@ -106,12 +108,14 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
   useEffect(() => {
     setProfiles(new Map());
     setContacts(undefined);
+    setFood(undefined);
     if (!householdId || !user) return;
     // Members' names and photos come from their own sign-ins; record ours for the others.
     saveMyProfile(db, householdId, user).catch(() => {});
     const stops = [
       watchProfiles(db, householdId, setProfiles),
       watchContacts(db, householdId, setContacts, { onError: () => setContacts([]) }),
+      watchFood(db, householdId, setFood),
       onSnapshot(
         doc(db, 'households', householdId, 'settings', 'portal'),
         (snap) => {
@@ -163,8 +167,9 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
       layout: view.status === 'ready' ? layout : undefined,
       contacts,
       agenda,
+      food,
     };
-  }, [user, household, profiles, layout, contacts, agenda]);
+  }, [user, household, profiles, layout, contacts, agenda, food]);
 
   const actions = useMemo((): HubActions => {
     const need = () => {
@@ -250,6 +255,12 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         const { id } = need();
         await deleteContact(db, id, contact.id).catch((e) => {
           throw words(e, "Couldn't delete the contact");
+        });
+      },
+      async saveFood(input) {
+        const { id, me } = need();
+        await saveFood(db, id, input, me).catch((e) => {
+          throw words(e, "Couldn't save the food preferences");
         });
       },
       async restoreContact(contact) {

@@ -1,5 +1,6 @@
 import { useMemo, useSyncExternalStore } from 'react';
 import type { Contact } from '@huishouden/pwa-kit/contacts';
+import { foodDoc } from '@huishouden/pwa-kit/food';
 import type { HubActions, HubState } from '../hub';
 
 /**
@@ -89,6 +90,9 @@ function previewActions(): HubActions {
     },
     async deleteContact(contact) {
       update((s) => ({ contacts: contactsOf(s).filter((c) => c.id !== contact.id) }));
+    },
+    async saveFood(input) {
+      update((s) => ({ food: foodDoc(input, s.me) }));
     },
     async restoreContact(contact) {
       update((s) => ({ contacts: [...contactsOf(s), contact].sort((a, b) => a.name.localeCompare(b.name)) }));

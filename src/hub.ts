@@ -1,5 +1,6 @@
 import type { AgendaItem } from '@huishouden/pwa-kit/agenda';
 import type { Contact, ContactInput } from '@huishouden/pwa-kit/contacts';
+import type { FoodInput, FoodPreferences } from '@huishouden/pwa-kit/food';
 import type { Invitation } from '@huishouden/pwa-kit/invite';
 import type { PortalLayout } from './apps';
 
@@ -51,6 +52,8 @@ export type HubState =
       contacts?: Contact[];
       /** Every app's dated things (`households/{id}/agenda`), soonest first; undefined while loading. */
       agenda?: AgendaItem[];
+      /** Who eats at home and what suits them (`settings/food`); undefined while loading. */
+      food?: FoodPreferences;
     };
 
 /** What the person can ask for. Each returns once done and throws an Error worded for people. */
@@ -68,6 +71,7 @@ export interface HubActions {
   updateContact(id: string, input: ContactInput): Promise<void>;
   deleteContact(contact: Contact): Promise<void>;
   restoreContact(contact: Contact): Promise<void>;
+  saveFood(input: FoodInput): Promise<void>;
 }
 
 /** Longest household name the panel accepts. */
