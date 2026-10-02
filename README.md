@@ -2,6 +2,10 @@
 
 The household's front door: one installable PWA that opens the other household apps.
 
+![Huishouden portal on a tablet](docs/screenshots/home.png)
+
+_Screenshot of the live site, refreshed by CI after each deploy._
+
 | App | URL | Repo |
 |---|---|---|
 | Huishouden (this) | https://huishouden-piekstra.web.app | piekstra/huishouden |

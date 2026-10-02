@@ -9,12 +9,13 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "icons": "pwa-icons",
-    "e2e": "playwright test",
+    "e2e": "playwright test e2e/smoke.spec.ts",
     "prepare": "git config core.hooksPath .githooks",
-    "bootstrap": "node_modules/@piekstra/pwa-kit/infra/bootstrap.sh infra/apps.conf"
+    "bootstrap": "node_modules/@piekstra/pwa-kit/infra/bootstrap.sh infra/apps.conf",
+    "screenshots": "playwright test e2e/screenshots.spec.ts"
   },
   "devDependencies": {
-    "@piekstra/pwa-kit": "github:piekstra/pwa-kit#v0.2.0",
+    "@piekstra/pwa-kit": "github:piekstra/pwa-kit#v0.3.0",
     "@playwright/test": "^1.63.0",
     "@types/bun": "^1.4.2",
     "sharp": "^0.35.5",
