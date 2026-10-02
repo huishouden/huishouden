@@ -80,3 +80,26 @@ a.tile:focus-visible { outline: 3px solid var(--hh-terracotta); outline-offset: 
 .invite-sent__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 8px; }
 .invite-sent__actions .link { min-height: 44px; display: inline-flex; align-items: center; }
 .notice { color: var(--hh-forest-700); }
+
+/* Dutch words that explain themselves (src/dutch-word.ts). */
+hh-word { position: relative; display: inline-block; }
+.hh-word__trigger {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: help;
+  text-decoration: underline dotted; text-decoration-thickness: 2px; text-underline-offset: 6px;
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+}
+.hh-word__trigger:focus-visible { outline: 3px solid var(--hh-terracotta); outline-offset: 4px; border-radius: 6px; }
+.hh-word__card {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 10; width: max-content; max-width: min(320px, 80vw);
+  display: flex; flex-direction: column; gap: 6px; padding: 14px 16px;
+  background: #fff; color: var(--ink); border-radius: var(--hh-radius); box-shadow: 0 6px 24px rgb(0 0 0 / 0.14);
+  font-size: 1rem; font-weight: 400; line-height: 1.4;
+}
+.hh-word__card[hidden] { display: none; }
+.hh-word__say { font-weight: 600; color: var(--green); }
+.hh-word__hint { color: var(--muted); font-size: 0.875rem; }
+.hh-word__listen {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; margin-top: 4px;
+  font: inherit; font-weight: 600; color: var(--hh-forest-700); background: var(--hh-forest-50); border: 0; border-radius: 999px; cursor: pointer;
+}
+.hh-word__listen:hover { background: var(--hh-forest-100); }
