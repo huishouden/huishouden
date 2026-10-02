@@ -82,3 +82,12 @@ a.tile:focus-visible { outline: 3px solid var(--hh-terracotta); outline-offset: 
 .hh-account-menu p { margin: 0 0 8px; color: var(--muted); overflow-wrap: anywhere; font-size: 0.875rem; }
 
 .version { margin: 8px 0 0; font-size: 0.75rem; color: var(--muted); }
+
+.members .hh-avatar { width: 40px; height: 40px; flex-shrink: 0; cursor: default; object-fit: cover; }
+.member { display: flex; flex-direction: column; }
+.member__name { font-weight: 600; }
+.invite-sent { margin: 0 0 16px; padding: 16px; border-radius: var(--hh-radius); background: var(--hh-forest-50); }
+.invite-sent p { margin: 0 0 8px; }
+.invite-sent__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 8px; }
+.invite-sent__actions .link { min-height: 44px; display: inline-flex; align-items: center; }
+.notice { color: var(--hh-forest-700); }
