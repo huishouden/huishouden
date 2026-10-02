@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/huishouden/portal/compare/v2.3.1...v2.4.0) (2026-10-02)
+
+
+### Features
+
+* **security:** security headers on app pages, none on Firebase /__/ sign-in paths ([#43](https://github.com/huishouden/portal/issues/43)) ([79bb7d0](https://github.com/huishouden/portal/commit/79bb7d0f3cadf03b7f0d1712ce3bb3731397f428))
+
 ## [2.3.1](https://github.com/huishouden/portal/compare/v2.3.0...v2.3.1) (2026-10-02)
 
 
