@@ -177,6 +177,24 @@ test('phone: calendar', async ({ page }) => {
   });
 });
 
+test('food', ({ page }) =>
+  captureScreenshot(page, 'food', {
+    fixedTime,
+    prepare: onApps(member(), async (p) => {
+      await p.getByRole('region', { name: 'Food' }).scrollIntoViewIfNeeded();
+      await expect(p.getByText('Jo', { exact: true })).toBeVisible();
+    }),
+  }));
+
+test('food person', ({ page }) =>
+  captureScreenshot(page, 'food-person', {
+    fixedTime,
+    prepare: onApps(member(), async (p) => {
+      await p.getByRole('button', { name: "Edit Alex's food" }).click();
+      await expect(p.getByRole('dialog', { name: "Alex's food" })).toBeVisible();
+    }),
+  }));
+
 test('contacts', ({ page }) =>
   captureScreenshot(page, 'contacts', {
     fixedTime,

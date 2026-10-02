@@ -27,7 +27,7 @@ Members of a household get four tabs; everyone else sees Apps, with what Huishou
 | Today (`/today`, members' default) | The wall-tablet glance: overdue things first, then today's, then the next two days, from every app's items in `households/{id}/agenda` (`@huishouden/pwa-kit/agenda`, `todayItems`); one line per app with what is overdue and coming up this week. Each item opens its app. |
 | Calendar (`/calendar`) | Overdue items, then every day from today with something on it (`agendaDays`), filtered by app. |
 | Contacts (`/contacts`) | Every household contact (`households/{id}/contacts`), whichever apps show it, grouped by role and tagged with its apps; added and edited with the kit's contact dialog. A new contact shows in no app (or in the app being filtered) until apps are chosen with Apps on its card. |
-| Apps (`/apps`) | The Dutch greeting (the word explains itself on hover or tap), the tiles, and the household: start one, rename it, members with their own names and photos, invites with an email from the inviter's Gmail. |
+| Apps (`/apps`) | The Dutch greeting (the word explains itself on hover or tap), the tiles, and the household: start one, rename it, members with their own names and photos, invites with an email from the inviter's Gmail; and Food: who eats at home (every member, plus people without an account), their diets, allergies, foods to avoid and a note, and the kitchen basics recipes may assume, saved in `households/{id}/settings/food` (`@huishouden/pwa-kit/food`) for Tasks' meal ideas and later apps. |
 
 ![Calendar](docs/screenshots/calendar.png)
 ![Contacts](docs/screenshots/contacts.png)
@@ -41,6 +41,7 @@ doesn't mention, such as apps added later, follow the ordered ones in registry o
 stay one tap away under More apps. Signed-out visitors see the default.
 
 ![Arranging the apps](docs/screenshots/tiles-arrange.png)
+![Food preferences](docs/screenshots/food.png)
 
 ## Code
 

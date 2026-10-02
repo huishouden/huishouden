@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import type { AgendaItem } from '@huishouden/pwa-kit/agenda';
 import type { Contact } from '@huishouden/pwa-kit/contacts';
+import type { FoodPreferences } from '@huishouden/pwa-kit/food';
 import type { HubState, ReadyHousehold } from '../../src/hub';
 
 // Invented people and places for previews of signed-in screens. E2E can't sign in to Google, so these
@@ -53,6 +54,17 @@ export const agenda: AgendaItem[] = [
   item({ id: 'a10', app: 'home', ref: 'appt:pest', kind: 'appointment', title: 'Terminix visit', start: local('2026-10-08T13:00'), end: local('2026-10-08T14:00') }),
 ];
 
+export const food: FoodPreferences = {
+  people: [
+    { id: me, name: 'Sam', member: me, diets: ['gerd'], avoid: ['cilantro'] },
+    { id: 'alex@example.com', name: 'Alex', member: 'alex@example.com', diets: ['vegetarian', 'pregnant'], avoid: [] },
+    { id: 'kid-1', name: 'Robin', diets: ['nut allergy'], avoid: ['mushrooms'], note: 'Small portions' },
+  ],
+  pantryAssumed: ['salt', 'black pepper', 'common dried herbs and spices', 'cooking oil', 'cooking spray', 'butter'],
+  updatedAt: at,
+  by: me,
+};
+
 export const member = (extra: Partial<Extract<HubState, { auth: 'signed-in' }>> = {}): HubState => ({
   auth: 'signed-in',
   user,
@@ -60,6 +72,7 @@ export const member = (extra: Partial<Extract<HubState, { auth: 'signed-in' }>> 
   household,
   contacts,
   agenda,
+  food,
   ...extra,
 });
 

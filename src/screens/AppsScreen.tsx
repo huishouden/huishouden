@@ -1,5 +1,6 @@
 import type { HouseholdApp, PortalLayout } from '../apps';
 import { Greeting } from '../components/DutchWord';
+import { FoodPanel } from '../components/FoodPanel';
 import { HouseholdPanel } from '../components/HouseholdPanel';
 import { Intro } from '../components/Intro';
 import { Tiles } from '../components/Tiles';
@@ -25,6 +26,7 @@ export function AppsScreen({ state, actions, apps, hour, signInError, onSignIn, 
       <Tiles apps={apps} layout={state.layout} canArrange={isMember(state)} onSave={onSaveLayout} />
       {state.auth === 'signed-out' && <Intro onSignIn={onSignIn} error={signInError} />}
       {state.auth === 'signed-in' && <HouseholdPanel state={state} actions={actions} notify={notify} fail={fail} />}
+      {isMember(state) && <FoodPanel household={state.household} food={state.food} actions={actions} fail={fail} />}
     </div>
   );
 }
