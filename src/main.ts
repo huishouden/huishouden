@@ -3,6 +3,7 @@ import { APPS } from './apps';
 import '@piekstra/pwa-kit/theme.css';
 import './style.css';
 import { mountHouseholdPanel } from './household-panel';
+import { mountAccountChip } from './account-chip';
 
 registerSW({ immediate: true });
 
@@ -38,3 +39,4 @@ for (const app of APPS) {
 }
 
 mountHouseholdPanel(document.getElementById('household')!);
+mountAccountChip(document.getElementById('account')!);

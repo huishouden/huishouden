@@ -73,3 +73,12 @@ a.tile:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
 .invite { display: flex; gap: 8px; flex-wrap: wrap; }
 .invite input { flex: 1; min-width: 220px; min-height: 44px; padding: 0 12px; border: 1px solid #d6d3d1; border-radius: var(--hh-radius); font: inherit; }
 .link { background: none; border: 0; padding: 0; color: var(--hh-forest-600); text-decoration: underline; cursor: pointer; font: inherit; }
+
+.top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.account { position: relative; margin-top: 12px; }
+.hh-account-menu {
+  position: absolute; right: 0; top: 52px; z-index: 10; min-width: 220px;
+  padding: 12px; border-radius: var(--hh-radius); background: #fff;
+  box-shadow: 0 8px 24px rgb(31 58 46 / 0.18);
+}
+.hh-account-menu p { margin: 0 0 8px; color: var(--muted); overflow-wrap: anywhere; font-size: 0.875rem; }
