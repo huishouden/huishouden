@@ -50,6 +50,7 @@ a.tile:focus-visible { outline: 3px solid var(--hh-terracotta); outline-offset: 
 .tile__desc { color: var(--muted); }
 
 .panel {
+  display: block;
   margin-top: 32px;
   padding: 24px;
   border-radius: 24px;
@@ -57,7 +58,31 @@ a.tile:focus-visible { outline: 3px solid var(--hh-terracotta); outline-offset: 
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 16px rgb(27 67 50 / 0.08);
   max-width: 640px;
 }
+.panel[hidden] { display: none; }
 .panel h2 { margin: 0 0 12px; color: var(--green); font-size: 1.25rem; }
+.panel p { margin: 0 0 12px; }
+.panel > :last-child, .intro > div > :last-child { margin-bottom: 0; }
+.panel__head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.panel__head h2 { margin: 0; }
+.panel__head .link { min-height: 44px; }
+
+/* Signed out: what Huishouden is and how to start, kept short so the tiles stay the main thing. */
+.panel--intro { max-width: none; }
+.intro { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 48px; }
+@media (max-width: 799px) { .intro { grid-template-columns: 1fr; } }
+.intro h3 { margin: 0 0 12px; font-size: 1rem; font-weight: 600; color: var(--ink); }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 12px; }
+.steps li { counter-increment: step; display: flex; align-items: baseline; gap: 12px; }
+.steps li::before {
+  content: counter(step); flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 999px; background: var(--hh-forest-50); color: var(--hh-forest-700);
+  font-size: 0.875rem; font-weight: 600;
+}
+
+/* Naming a new household, or renaming one. */
+.name-form { margin-bottom: 12px; }
+.name-form label { display: block; margin-bottom: 6px; font-weight: 500; }
+.name-form__row { display: flex; gap: 8px; flex-wrap: wrap; }
 .muted { color: var(--muted); }
 .small { font-size: 0.875rem; }
 .error { color: #b91c1c; }
@@ -67,8 +92,9 @@ a.tile:focus-visible { outline: 3px solid var(--hh-terracotta); outline-offset: 
 .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; }
 .badge--joined { background: var(--hh-forest-100); color: var(--hh-forest-700); }
 .badge--invited { background: var(--hh-terracotta-light); color: var(--hh-terracotta-dark); }
-.invite { display: flex; gap: 8px; flex-wrap: wrap; }
-.invite input { flex: 1; min-width: 220px; min-height: 44px; padding: 0 12px; border: 1px solid #d6d3d1; border-radius: var(--hh-radius); font: inherit; }
+.invite { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.invite input, .name-form input { flex: 1; min-width: 220px; min-height: 44px; padding: 0 12px; border: 1px solid #d6d3d1; border-radius: var(--hh-radius); font: inherit; }
+.invite input:focus, .name-form input:focus { outline: none; border-color: var(--hh-forest-500); box-shadow: 0 0 0 3px var(--hh-forest-200); }
 .link { background: none; border: 0; padding: 0; color: var(--hh-forest-600); text-decoration: underline; cursor: pointer; font: inherit; }
 
 

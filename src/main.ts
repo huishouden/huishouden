@@ -3,6 +3,7 @@ import { APPS } from './apps';
 import '@huishouden/pwa-kit/theme.css';
 import './style.css';
 import './dutch-word';
+import './household-view';
 import { mountHouseholdPanel } from './household-panel';
 import { mountAppBar } from './app-bar';
 
@@ -49,5 +50,5 @@ for (const app of APPS) {
   nav.append(tile);
 }
 
-mountHouseholdPanel(document.getElementById('household')!);
+mountHouseholdPanel(document.querySelector('hh-household')!);
 mountAppBar(document.querySelector('hh-app-bar')!);
