@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/huishouden/portal/compare/v1.3.0...v1.4.0) (2026-10-02)
+
+
+### Features
+
+* the Dutch greeting explains itself — hover or tap for an English sound-alike, meaning and audio ([#14](https://github.com/huishouden/portal/issues/14)) ([294e7af](https://github.com/huishouden/portal/commit/294e7af6eaae0b355b5585c6d0d6bede6f2d77ca))
+
 ## [1.3.0](https://github.com/huishouden/portal/compare/v1.2.0...v1.3.0) (2026-10-02)
 
 
