@@ -3,7 +3,7 @@ import { agendaDays, agendaStatus, agendaTime, type AgendaItem } from '@huishoud
 import { dueText, toYmd } from '@huishouden/pwa-kit/time';
 import { Chip, cardClass, overline } from '@huishouden/pwa-kit/react/ui';
 import type { HouseholdApp } from '../apps';
-import { AppIcon } from '../components/AppIcon';
+import { ItemIcon, KIND_WORDS, itemMeta } from '../components/ItemIcon';
 
 interface Props {
   agenda: AgendaItem[] | undefined;
@@ -76,17 +76,21 @@ function Day({ label, attention, children }: { label: string; attention?: boolea
 }
 
 function Row({ item, app, when, attention, done }: { item: AgendaItem; app?: HouseholdApp; when: string; attention?: boolean; done?: boolean }) {
-  const meta = [item.who, item.detail].filter(Boolean).join(' · ');
+  const meta = itemMeta(item);
   return (
     <li>
       <a href={item.url} className="flex min-h-14 items-center gap-4 px-5 py-3 hover:bg-forest-50">
         <span className={`w-20 shrink-0 text-sm tabular-nums sm:w-44 sm:text-base ${attention ? 'font-medium text-terracotta-dark' : 'text-stone-600'}`}>{when}</span>
-        {app && <AppIcon app={app} size={28} />}
+        <ItemIcon item={item} app={app} size={28} />
         <span className="min-w-0 flex-1">
           <span className={`block font-medium [overflow-wrap:break-word] ${done ? 'text-stone-600 line-through' : 'text-stone-800'}`}>{item.title}</span>
           {meta && <span className="block text-sm text-stone-600 [overflow-wrap:break-word]">{meta}</span>}
         </span>
-        <span className="hidden shrink-0 text-sm text-stone-600 sm:inline">{app?.name}</span>
+        <span className="sr-only">
+          {KIND_WORDS[item.kind]}
+          {done ? ', done' : ''}.
+        </span>
+        {app && <span className="sr-only shrink-0 text-sm text-stone-600 sm:not-sr-only">{app.name}</span>}
       </a>
     </li>
   );

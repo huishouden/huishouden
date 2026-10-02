@@ -33,7 +33,7 @@ export const contacts: Contact[] = [
 
 // Local times, like the apps publish them; the screenshots freeze the clock at 9:00 on October 1.
 const local = (s: string) => new Date(s).getTime();
-const item = (i: Omit<AgendaItem, 'updatedAt' | 'by' | 'url' | 'allDay'> & { allDay?: boolean; path?: string }): AgendaItem => ({
+const item = (i: Omit<AgendaItem, 'updatedAt' | 'by' | 'url' | 'allDay'> & Partial<Pick<AgendaItem, 'updatedAt' | 'by' | 'allDay'>> & { path?: string }): AgendaItem => ({
   allDay: false,
   url: `https://huishouden-${i.app}.web.app/${i.path ?? ''}`,
   updatedAt: at,
@@ -52,12 +52,21 @@ export const agenda: AgendaItem[] = [
   item({ id: 'a8', app: 'car', ref: 'renewal:registration', kind: 'renewal', title: 'Registration renewal', who: 'Hatchback', start: local('2026-10-14T00:00'), allDay: true, status: 'upcoming' }),
   item({ id: 'a9', app: 'home', ref: 'job:hvac', kind: 'due', title: 'HVAC filter', start: local('2026-10-20T00:00'), allDay: true, status: 'upcoming' }),
   item({ id: 'a10', app: 'home', ref: 'appt:pest', kind: 'appointment', title: 'Terminix visit', start: local('2026-10-08T13:00'), end: local('2026-10-08T14:00') }),
+  // Done this morning: they show folded away under "Done today", with who and when.
+  item({ id: 'd1', app: 'pet', ref: 'feed:breakfast', kind: 'feeding', title: "Biscuit's breakfast", who: 'Biscuit', detail: '1 cup dry food', start: local('2026-10-01T07:00'), status: 'done', updatedAt: local('2026-10-01T07:05'), by: 'alex@example.com' }),
+  item({ id: 'd2', app: 'tasks', ref: 'task:recycling', kind: 'task', title: 'Take out the recycling', start: local('2026-10-01T00:00'), allDay: true, status: 'done', updatedAt: local('2026-10-01T08:15') }),
+  // An ongoing course: on the calendar, not on Today.
+  item({ id: 'm1', app: 'pet', ref: 'med:course', kind: 'medicine', title: 'Antibiotic course', who: 'Biscuit', start: local('2026-09-28T00:00'), end: local('2026-10-05T00:00'), allDay: true }),
 ];
+
+/** The agenda after an app marks `id` done just now. */
+export const markedDone = (id: string, by = me): AgendaItem[] =>
+  agenda.map((i) => (i.id === id ? { ...i, status: 'done', updatedAt: local('2026-10-01T09:00'), by } : i));
 
 export const food: FoodPreferences = {
   people: [
-    { id: me, name: 'Sam', member: me, diets: ['gerd'], avoid: ['cilantro'] },
-    { id: 'alex@example.com', name: 'Alex', member: 'alex@example.com', diets: ['vegetarian', 'pregnant'], avoid: [] },
+    { id: me, name: 'Sam', member: me, diets: ['gerd'], avoid: ['cilantro'], spice: 'mild' },
+    { id: 'alex@example.com', name: 'Alex', member: 'alex@example.com', diets: ['vegetarian', 'pregnant'], avoid: [], spice: 'hot' },
     { id: 'kid-1', name: 'Robin', diets: ['nut allergy'], avoid: ['mushrooms'], note: 'Small portions' },
   ],
   pantryAssumed: ['salt', 'black pepper', 'common dried herbs and spices', 'cooking oil', 'cooking spray', 'butter'],
@@ -75,6 +84,9 @@ export const member = (extra: Partial<Extract<HubState, { auth: 'signed-in' }>> 
   food,
   ...extra,
 });
+
+/** A device that remembers a member, while sign-in restores. */
+export const restoring: HubState = { auth: 'starting', remembered: true };
 
 export const noHousehold: HubState = { auth: 'signed-in', user, me, household: { status: 'none', suggestedName: "Sam's household" } };
 

@@ -22,9 +22,18 @@ import { saveFood, watchFood, type FoodPreferences } from '@huishouden/pwa-kit/f
 import { googleAccessMessage, readError } from '@huishouden/pwa-kit/feedback';
 import { DEFAULT_LAYOUT, parseLayout, type PortalLayout } from '../apps';
 import { auth, db, googleClientId } from '../firebase';
+import { rememberHousehold, rememberedHousehold } from '../memberHint';
 import { MAX_NAME, suggestedHouseholdName, type HouseholdView, type HubActions, type HubState } from '../hub';
 
 const LAYOUT_CACHE = 'hh-portal-layout';
+
+const storage = (): Storage | undefined => {
+  try {
+    return localStorage;
+  } catch {
+    return undefined;
+  }
+};
 
 /** The last layout this browser saw, so a member's tiles don't jump while sign-in resolves. */
 function cachedLayout(): PortalLayout | undefined {
@@ -72,6 +81,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
   const [contacts, setContacts] = useState<Contact[] | undefined>(undefined);
   const [agenda, setAgenda] = useState<AgendaItem[] | undefined>(undefined);
   const [food, setFood] = useState<FoodPreferences | undefined>(undefined);
+  const [remembered, setRemembered] = useState(() => rememberedHousehold(storage()) !== undefined);
   const today = useToday();
 
   useEffect(
@@ -81,6 +91,8 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         if (!u) {
           setLayout(undefined);
           cacheLayout(undefined);
+          rememberHousehold(storage(), undefined);
+          setRemembered(false);
         }
       }),
     [],
@@ -100,6 +112,15 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
 
   const ready = household.status === 'ready' ? household.household : undefined;
   const householdId = ready?.id;
+
+  // Remember on this device whether a member is signed in, for the next load (src/memberHint.ts).
+  useEffect(() => {
+    if (householdId) rememberHousehold(storage(), householdId);
+    else if (household.status === 'none') {
+      rememberHousehold(storage(), undefined);
+      setRemembered(false);
+    }
+  }, [householdId, household.status]);
 
   useEffect(() => {
     if (ready && email) markJoined(db, ready, email).catch(() => {});
@@ -141,7 +162,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
   }, [householdId, today]);
 
   const state = useMemo((): HubState => {
-    if (user === undefined) return { auth: 'starting', layout };
+    if (user === undefined) return { auth: 'starting', layout, remembered };
     if (!user?.email) return { auth: 'signed-out' };
     const me = normalizeEmail(user.email);
     let view: HouseholdView;
@@ -161,6 +182,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
     }
     return {
       auth: 'signed-in',
+      remembered,
       user: { name: user.displayName, email: user.email, photoURL: user.photoURL },
       me,
       household: view,
@@ -169,7 +191,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
       agenda,
       food,
     };
-  }, [user, household, profiles, layout, contacts, agenda, food]);
+  }, [user, household, profiles, layout, contacts, agenda, food, remembered]);
 
   const actions = useMemo((): HubActions => {
     const need = () => {

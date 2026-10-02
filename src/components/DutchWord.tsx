@@ -110,10 +110,11 @@ const GREETINGS = [
   { until: 24, word: 'Goedenavond', say: 'KHOO-duh-nah-vont', means: 'Good evening' },
 ];
 
-export function Greeting({ hour, children }: { hour: number; children?: ReactNode }) {
+/** `compact`: smaller on phones, where Today's items should start as high as possible. */
+export function Greeting({ hour, compact, children }: { hour: number; compact?: boolean; children?: ReactNode }) {
   const g = GREETINGS.find((x) => hour < x.until)!;
   return (
-    <h2 className="text-[clamp(1.75rem,4vw,2.25rem)] font-bold text-forest-700">
+    <h2 className={`${compact ? 'text-2xl sm:text-[clamp(1.75rem,4vw,2.25rem)]' : 'text-[clamp(1.75rem,4vw,2.25rem)]'} font-bold text-forest-700`}>
       <DutchWord word={g.word} say={g.say} means={g.means} />
       {children}
     </h2>

@@ -1,6 +1,18 @@
 import { useState, type FormEvent } from 'react';
 import { Pencil, Plus, Trash2, UserPlus, X } from 'lucide-react';
-import { DEFAULT_PANTRY, DIETS, DIET_LABELS, FOOD_LIMITS, withMembers, type Diet, type FoodPerson, type FoodPreferences } from '@huishouden/pwa-kit/food';
+import {
+  DEFAULT_PANTRY,
+  DIETS,
+  DIET_LABELS,
+  FOOD_LIMITS,
+  SPICE_LABELS,
+  SPICE_LEVELS,
+  withMembers,
+  type Diet,
+  type FoodPerson,
+  type FoodPreferences,
+  type SpiceTolerance,
+} from '@huishouden/pwa-kit/food';
 import { Chip, Dialog, Field, cardClass, deleteButton, ghostButton, iconButton, inputClass, primaryButton, secondaryButton } from '@huishouden/pwa-kit/react/ui';
 import type { HubActions, ReadyHousehold } from '../hub';
 
@@ -32,6 +44,13 @@ export function FoodPanel({ household, food, actions, fail }: Props) {
   const save = (next: { people?: FoodPerson[]; pantryAssumed?: string[] }) =>
     actions.saveFood({ people: next.people ?? people, pantryAssumed: next.pantryAssumed ?? pantry }).catch((e) => fail(e instanceof Error ? e.message : String(e)));
 
+  /** Tapping the chosen level again clears it: no preference. */
+  const setSpice = (person: FoodPerson, level: SpiceTolerance) => {
+    const next = person.spice === level ? { ...person, spice: undefined } : { ...person, spice: level };
+    if (!next.spice) delete next.spice;
+    void save({ people: people.map((p) => (p.id === person.id ? next : p)) });
+  };
+
   const addPantry = (e: FormEvent) => {
     e.preventDefault();
     const item = pantryItem.trim().replace(/\|/g, '/').slice(0, FOOD_LIMITS.pantryItem);
@@ -49,23 +68,36 @@ export function FoodPanel({ household, food, actions, fail }: Props) {
         </button>
       </div>
       <p className="mb-3 text-stone-600">Who eats at home, and what suits them. Meal ideas in Tasks follow these.</p>
+      <p className="mb-3 text-sm text-stone-600">Meal ideas keep to the lowest heat anyone picked.</p>
       {food === undefined ? (
         <p className="text-stone-600">Loading.</p>
       ) : (
         <ul className="mb-5" aria-label="People">
           {people.map((p) => (
-            <li key={p.id} className="flex items-center gap-3 border-b border-stone-200 py-2.5">
-              <span className="min-w-0 flex-1 [overflow-wrap:break-word]">
-                <span className="block font-semibold">
-                  {p.name}
-                  {p.member === undefined && <span className="font-normal text-stone-600"> (no account)</span>}
+            <li key={p.id} className="border-b border-stone-200 py-2.5">
+              <div className="flex items-center gap-3">
+                <span className="min-w-0 flex-1 [overflow-wrap:break-word]">
+                  <span className="block font-semibold">
+                    {p.name}
+                    {p.member === undefined && <span className="font-normal text-stone-600"> (no account)</span>}
+                  </span>
+                  <span className="block text-stone-600">{personSummary(p)}</span>
+                  {p.note && <span className="block text-sm text-stone-600">{p.note}</span>}
                 </span>
-                <span className="block text-stone-600">{personSummary(p)}</span>
-                {p.note && <span className="block text-sm text-stone-600">{p.note}</span>}
-              </span>
-              <button type="button" className={iconButton} aria-label={`Edit ${p.name}'s food`} onClick={() => setEditing(p)}>
-                <Pencil size={18} />
-              </button>
+                <button type="button" className={iconButton} aria-label={`Edit ${p.name}'s food`} onClick={() => setEditing(p)}>
+                  <Pencil size={18} />
+                </button>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label={`${p.name}'s spice`}>
+                <span className="mr-1 text-sm font-medium text-stone-700" aria-hidden="true">
+                  Spice
+                </span>
+                {SPICE_LEVELS.map((level) => (
+                  <Chip key={level} active={p.spice === level} onClick={() => setSpice(p, level)}>
+                    {SPICE_LABELS[level]}
+                  </Chip>
+                ))}
+              </div>
             </li>
           ))}
         </ul>
@@ -148,6 +180,7 @@ function PersonDialog({ person, onSave, onDelete, onClose }: { person: FoodPerso
       ...(person?.member ? { member: person.member } : {}),
       diets: DIETS.filter((d) => diets.includes(d)),
       avoid: [...avoid, ...pending.filter((s) => !avoid.some((a) => a.toLowerCase() === s.toLowerCase()))].slice(0, FOOD_LIMITS.avoid),
+      ...(person?.spice ? { spice: person.spice } : {}),
       ...(trimmedNote ? { note: trimmedNote } : {}),
     });
     onClose();
