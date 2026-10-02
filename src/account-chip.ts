@@ -1,5 +1,5 @@
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { forgetSilentSignIn } from '@piekstra/pwa-kit/auth';
+import { forgetSilentSignIn } from '@piekstra/huishouden-pwa-kit/auth';
 import { auth } from './firebase';
 
 /**
@@ -42,7 +42,10 @@ export function mountAccountChip(root: HTMLElement) {
       await forgetSilentSignIn();
       await signOut(auth);
     };
-    menu.append(who, out);
+    const version = document.createElement('p');
+    version.className = 'version';
+    version.textContent = `Huishouden ${import.meta.env.VITE_APP_VERSION} (${import.meta.env.VITE_BUILD_SHA})`;
+    menu.append(who, out, version);
 
     button.onclick = () => (menu.hidden = !menu.hidden);
     document.addEventListener('click', (e) => {
