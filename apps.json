@@ -21,7 +21,19 @@
     "repo": "home",
     "site": "huishouden-home",
     "webApp": "Home",
-    "glyph": "wrench"
+    "glyph": "wrench",
+    "contactRoles": [
+      "HVAC",
+      "Pest control",
+      "Lawn service",
+      "Plumber",
+      "Electrician",
+      "Roofer",
+      "Pool service",
+      "Handyman",
+      "Insurance",
+      "HOA"
+    ]
   },
   {
     "name": "Pet",
@@ -29,7 +41,15 @@
     "repo": "pet",
     "site": "huishouden-pet",
     "webApp": "Pet",
-    "glyph": "paw"
+    "glyph": "paw",
+    "contactRoles": [
+      "Vet",
+      "Emergency vet",
+      "Groomer",
+      "Boarding",
+      "Pet sitter",
+      "Trainer"
+    ]
   },
   {
     "name": "Car",
@@ -37,7 +57,15 @@
     "repo": "car",
     "site": "huishouden-car",
     "webApp": "Car",
-    "glyph": "car"
+    "glyph": "car",
+    "contactRoles": [
+      "Mechanic",
+      "Dealer",
+      "Tires",
+      "Body shop",
+      "Car wash",
+      "Insurance"
+    ]
   },
   {
     "name": "Bills",
@@ -61,6 +89,13 @@
     "repo": "baby",
     "site": "huishouden-baby",
     "webApp": "Baby",
-    "glyph": "bottle"
+    "glyph": "bottle",
+    "contactRoles": [
+      "Pediatrician",
+      "OB / midwife",
+      "Hospital",
+      "Lactation consultant",
+      "Doula"
+    ]
   }
 ]

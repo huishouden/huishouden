@@ -8,8 +8,8 @@ and every household app follows them. This file adds what is specific to the hou
 - Firebase project: `huishouden-piekstra` (free plan, no billing account). Sites:
   `huishouden-piekstra` (this portal), `huishouden-spending`, `huishouden-tasks`.
 - Wiring: `bun run bootstrap` here runs pwa-kit's bootstrap with `infra/apps.conf`.
-- Register each app in this portal's `src/apps.ts`; set `live: true` once it is deployed.
-- Firestore rules: the project's single rules file is deployed from `household-tasks`. Other apps'
+- Register each app once, in this portal's `apps.json` (tiles, contact roles, and the apps `infra/apps.conf` provisions).
+- Firestore rules: the project's single rules file is deployed from `huishouden/rules`. Every app's
   blocks go there (spending's is `households/{householdId}/spendingTransactions`).
 - `authDomain`: `huishouden-piekstra.firebaseapp.com`.
 
@@ -26,8 +26,8 @@ judged rather than copied.
   Hosting site (`huishouden-<app>.web.app`) and its own Firebase web app registration.
   Unrelated or shareable projects get their own Firebase project instead.
 - **Stack**: Vite + TypeScript, `vite-plugin-pwa` (Workbox), bun. React where the app has state;
-  plain TS is fine for static pages like the portal.
-- **Register the app in the portal**: add it to `src/apps.ts` here; set `live: true` once deployed.
+  the portal is React too.
+- **Register the app in the portal**: add it to `apps.json` here.
 - **Wire it up with `infra/bootstrap.sh`**: add the repo to `APPS` and re-run. It creates the
   site and web app and sets the repo variables. Never hand-create deploy keys.
 
@@ -52,7 +52,7 @@ judged rather than copied.
   Drive) shows "unverified app" once per user and counts toward a lifetime cap of 100 users.
   Prefer designs that need no Google API scopes in the browser.
 - Household data lives in Firestore in the shared project, under `households/{householdId}/<collection>`
-  per app. The project's single rules file is deployed from `household-tasks` (see above).
+  per app. The project's single rules file is deployed from `huishouden/rules` (see above).
 - Card names, people and other household facts are data, not code: keep them in the Sheet or
   Firestore, not in the repo (the repos may be published).
 

@@ -1,21 +1,36 @@
 # Huishouden
 
-The household's front door: one installable PWA that opens the other household apps.
+The household's hub: one installable PWA with the day across every household app, the household's
+calendar and contacts, and the apps themselves.
 
-![Huishouden portal on a tablet](docs/screenshots/home.png)
+![Today on a tablet](docs/screenshots/today.png)
 
-_Screenshot of the live site, refreshed by CI after each deploy._
+_Screenshots of the live site with invented data, refreshed by CI after each deploy._
 
 | App | URL | Repo |
 |---|---|---|
 | Huishouden (this) | https://huishouden-piekstra.web.app | huishouden/portal |
-| Spending | https://huishouden-spending.web.app | huishouden/spending |
-| Tasks & Groceries | https://huishouden-tasks.web.app | piekstra/huishouden-tasks |
+| Every other app | `https://<site>.web.app` | `huishouden/<repo>`, listed in `apps.json` |
 
 Every app follows [STANDARDS.md](STANDARDS.md). Each app is its own repo and its own Firebase Hosting site in project `huishouden-piekstra`.
-Every app is listed once, in `apps.json`: the tiles come from it, and `infra/apps.conf` reads it to
-provision hosting. Its order is the default tile order: simple everyday apps first, Spending (which
-needs setup) after them, Baby (not for every household) last.
+Every app is listed once, in `apps.json`: the tiles come from it, `contactRoles` says which apps show
+contacts (and the roles they offer), and `infra/apps.conf` reads it to provision hosting. Its order is
+the default tile order: simple everyday apps first, Spending (which needs setup) after them, Baby (not
+for every household) last.
+
+## Tabs
+
+Members of a household get four tabs; everyone else sees Apps, with what Huishouden is and how to start.
+
+| Tab | Shows |
+|---|---|
+| Today (`/today`, members' default) | The wall-tablet glance: overdue things first, then today's, then the next two days, from every app's items in `households/{id}/agenda` (`@huishouden/pwa-kit/agenda`, `todayItems`); one line per app with what is overdue and coming up this week. Each item opens its app. |
+| Calendar (`/calendar`) | Overdue items, then every day from today with something on it (`agendaDays`), filtered by app. |
+| Contacts (`/contacts`) | Every household contact (`households/{id}/contacts`), whichever apps show it, grouped by role and tagged with its apps; added and edited with the kit's contact dialog. A new contact shows in no app (or in the app being filtered) until apps are chosen with Apps on its card. |
+| Apps (`/apps`) | The Dutch greeting (the word explains itself on hover or tap), the tiles, and the household: start one, rename it, members with their own names and photos, invites with an email from the inviter's Gmail. |
+
+![Calendar](docs/screenshots/calendar.png)
+![Contacts](docs/screenshots/contacts.png)
 
 ## Tiles
 
@@ -27,12 +42,22 @@ stay one tap away under More apps. Signed-out visitors see the default.
 
 ![Arranging the apps](docs/screenshots/tiles-arrange.png)
 
+## Code
+
+React 19, Tailwind v4 and the kit's UI (`@huishouden/pwa-kit/react/*`). `src/data/live.ts` turns
+sign-in and Firestore into one `HubState` (`src/hub.ts`) and the actions that change it; the screens
+only render that state. Tests can't sign in to Google, so the smoke and screenshot tests hand the app
+invented state with `window.__hubPreview(state)` (`src/data/preview.ts`, `e2e/fixtures/hub.ts`);
+its actions then change only that state in the tab, never Firestore.
+
 ## Develop
 
 ```sh
 bun install
+bun run env:pull # the public Firebase web config, into .env.local
 bun run dev      # http://localhost:3001
 bun run lint && bun run test && bun run build
+BASE_URL=http://localhost:4173 bun run e2e   # against `bun run preview`
 bun run icons    # after editing public/icon.svg
 ```
 

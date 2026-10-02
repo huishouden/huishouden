@@ -1,160 +1,219 @@
 import { expect, test, type Page } from '@playwright/test';
 import { captureScreenshot } from '@huishouden/pwa-kit/e2e';
-import type { PanelView } from '../src/household-view';
-import type { PortalLayout } from '../src/apps';
+import type { HubState } from '../src/hub';
+import { me, member, noHousehold, showHub } from './fixtures/hub';
 
-// README images, refreshed by CI after each deploy (only committed when they change).
+// README images, refreshed by CI after each deploy (only committed when they change). Signed-in
+// screens show invented data handed to the app (window.__hubPreview); nothing reaches Firestore.
 const fixedTime = '2026-10-01T09:00:00';
+const phone = (page: Page) => page.setViewportSize({ width: 390, height: 844 });
+const tab = (p: Page, name: string) => p.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name }).click();
+const preview = (state: HubState, then?: (p: Page) => Promise<void>) => async (p: Page) => {
+  await showHub(p, state);
+  await then?.(p);
+};
+/** A member's Apps tab (members land on Today). */
+const onApps = (state: HubState, then?: (p: Page) => Promise<void>) =>
+  preview(state, async (p) => {
+    await tab(p, 'Apps');
+    await then?.(p);
+  });
 
 test('home', ({ page }) => captureScreenshot(page, 'home', { fixedTime }));
 
 test('phone: home', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await phone(page);
   await captureScreenshot(page, 'phone-home', { fixedTime });
 });
 
 test('phone: getting started', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await phone(page);
   await captureScreenshot(page, 'phone-getting-started', {
     fixedTime,
     prepare: (p) => p.getByRole('heading', { name: 'How it works' }).scrollIntoViewIfNeeded(),
   });
 });
 
-// The app bar with an invented signed-in person and the account menu open.
-test('account menu', ({ page }) =>
-  captureScreenshot(page, 'account-menu', {
+test('dutch word', ({ page }) =>
+  captureScreenshot(page, 'dutch-word', {
     fixedTime,
     prepare: async (p) => {
-      await signInAs(p);
-      await p.getByRole('button', { name: 'Signed in as sam@example.com' }).click();
-      await expect(p.getByText('sam@example.com', { exact: true })).toBeVisible();
+      await p.getByRole('button', { name: 'Goedemorgen' }).click();
+      await expect(p.getByText('Means: Good morning')).toBeVisible();
     },
   }));
 
-// Signed-in household panel states. E2E can't sign in to Google, so these give the panel's view
-// invented data directly (`<hh-household>.view`); nothing here reaches Firestore.
-const me = 'sam@example.com';
+test('account menu', ({ page }) =>
+  captureScreenshot(page, 'account-menu', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await p.getByRole('button', { name: `Signed in as ${me}` }).click();
+      await expect(p.getByText(me, { exact: true }).first()).toBeVisible();
+    }),
+  }));
 
-async function signInAs(p: Page) {
-  await p.locator('hh-app-bar').evaluate((bar: HTMLElementTagNameMap['hh-app-bar']) => {
-    bar.user = { name: 'Sam Example', email: 'sam@example.com', photoURL: null };
-  });
-}
-
-async function showPanel(p: Page, view: PanelView) {
-  // Wait for sign-in to resolve as signed out, so it can't replace the view set below.
-  await expect(p.locator('#household').getByRole('heading', { name: 'How it works' })).toBeVisible();
-  await signInAs(p);
-  await p.locator('hh-household').evaluate((el: HTMLElementTagNameMap['hh-household'], v) => (el.view = v), view);
-  await p.locator('hh-household').scrollIntoViewIfNeeded();
-}
+test('apps', ({ page }) =>
+  captureScreenshot(page, 'apps', {
+    fixedTime,
+    prepare: onApps(member(), (p) => expect(p.getByRole('heading', { name: "Sam's household" })).toBeVisible()),
+  }));
 
 test('no household yet', ({ page }) =>
   captureScreenshot(page, 'household-none', {
     fixedTime,
-    prepare: async (p) => {
-      await showPanel(p, { status: 'none', me, suggestedName: "Sam's household" });
+    prepare: preview(noHousehold, async (p) => {
       await expect(p.getByRole('button', { name: 'Start a household' })).toBeVisible();
       await expect(p.getByText(`Waiting for an invite? Ask a member to invite ${me}.`)).toBeVisible();
-    },
+      await p.locator('#household').scrollIntoViewIfNeeded();
+    }),
   }));
 
 test('naming a new household', ({ page }) =>
   captureScreenshot(page, 'household-start', {
     fixedTime,
-    prepare: async (p) => {
-      await showPanel(p, { status: 'none', me, suggestedName: "Sam's household" });
+    prepare: preview(noHousehold, async (p) => {
       await p.getByRole('button', { name: 'Start a household' }).click();
       const name = p.getByLabel('Name', { exact: true });
       await expect(name).toHaveValue("Sam's household");
       await expect(name).toBeFocused();
-    },
+      await p.locator('#household').scrollIntoViewIfNeeded();
+    }),
   }));
 
 test('a household just started', ({ page }) =>
   captureScreenshot(page, 'household-new', {
     fixedTime,
-    prepare: async (p) => {
-      await showPanel(p, {
-        status: 'ready',
-        me,
-        household: { id: 'h1', name: "Sam's household", members: [me], joined: [me] },
-        profiles: { [me]: { name: 'Sam Example' } },
-        focusInvite: true,
-      });
+    prepare: preview(noHousehold, async (p) => {
+      await p.getByRole('button', { name: 'Start a household' }).click();
+      await p.getByRole('button', { name: 'Start', exact: true }).click();
       await expect(p.getByText("Invite the people you live with. They'll get every app when they sign in.")).toBeVisible();
       await expect(p.getByPlaceholder('Their Google account email')).toBeFocused();
-    },
+      await p.locator('#household').scrollIntoViewIfNeeded();
+    }),
   }));
 
 test('renaming the household', ({ page }) =>
   captureScreenshot(page, 'household-rename', {
     fixedTime,
-    prepare: async (p) => {
-      await showPanel(p, {
-        status: 'ready',
-        me,
-        household: { id: 'h1', name: "Sam's household", members: [me, 'alex@example.com', 'jo@example.com'], joined: [me, 'alex@example.com'] },
-        profiles: { [me]: { name: 'Sam Example' }, 'alex@example.com': { name: 'Alex Example' } },
-      });
+    prepare: onApps(member(), async (p) => {
       await p.getByRole('button', { name: 'Rename' }).click();
       const name = p.getByLabel('Household name');
       await expect(name).toHaveValue("Sam's household");
       await name.fill('The Example house');
-    },
+      await p.locator('#household').scrollIntoViewIfNeeded();
+    }),
   }));
 
-// A household's own tile layout, given to `<hh-tiles>.view` the same way (no Firestore).
-const household: PanelView = {
-  status: 'ready',
-  me,
-  household: { id: 'h1', name: "Sam's household", members: [me, 'alex@example.com'], joined: [me, 'alex@example.com'] },
-  profiles: { [me]: { name: 'Sam Example' }, 'alex@example.com': { name: 'Alex Example' } },
-};
-
-async function showLayout(p: Page, layout: PortalLayout) {
-  await showPanel(p, household);
-  await p.locator('hh-tiles').evaluate((el: HTMLElementTagNameMap['hh-tiles'], layout) => {
-    el.view = { ...el.view, layout, canArrange: true };
-  }, layout);
-  await p.evaluate(() => window.scrollTo(0, 0));
-}
+test('inviting someone', ({ page }) =>
+  captureScreenshot(page, 'household-invited', {
+    fixedTime,
+    prepare: onApps(member(), async (p) => {
+      await p.getByPlaceholder('Their Google account email').fill('robin@example.com');
+      await p.getByRole('button', { name: 'Invite', exact: true }).click();
+      await expect(p.getByText('robin@example.com is invited. Let them know by email:')).toBeVisible();
+      await p.locator('#household').scrollIntoViewIfNeeded();
+    }),
+  }));
 
 test('arranging the apps', ({ page }) =>
   captureScreenshot(page, 'tiles-arrange', {
     fixedTime,
-    prepare: async (p) => {
-      await showLayout(p, { order: [], hidden: ['baby'] });
+    prepare: onApps(member({ layout: { order: ['tasks', 'pet', 'home', 'car', 'bills', 'spending', 'baby'], hidden: ['baby'] } }), async (p) => {
       await p.getByRole('button', { name: 'Arrange' }).click();
-      await expect(p.getByRole('heading', { name: 'Arrange apps' })).toBeFocused();
-      await p.getByRole('button', { name: 'Move Pet earlier' }).click();
-      await expect(p.getByRole('button', { name: 'Move Pet earlier' })).toBeFocused();
-      await expect(p.getByRole('button', { name: 'Show Baby' })).toBeVisible();
-      await p.evaluate(() => window.scrollTo(0, 0));
-    },
+      await p.getByRole('button', { name: 'Move Home earlier' }).focus();
+    }),
   }));
 
 test('a household with hidden apps', ({ page }) =>
   captureScreenshot(page, 'tiles-hidden', {
     fixedTime,
-    prepare: async (p) => {
-      await showLayout(p, { order: ['pet', 'tasks', 'home', 'car', 'bills', 'spending', 'baby'], hidden: ['spending', 'baby'] });
-      await expect(p.getByRole('navigation', { name: 'Household apps' }).locator('a.tile')).toHaveCount(5);
+    prepare: onApps(member({ layout: { order: [], hidden: ['spending', 'baby'] } }), async (p) => {
       await p.getByText('More apps').click();
       await expect(p.getByRole('navigation', { name: 'More apps' }).getByRole('link')).toHaveCount(2);
-      await p.evaluate(() => window.scrollTo(0, 0));
-    },
+    }),
   }));
 
 test('phone: arranging the apps', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await phone(page);
   await captureScreenshot(page, 'phone-tiles-arrange', {
     fixedTime,
-    prepare: async (p) => {
-      await showLayout(p, { order: [], hidden: [] });
+    prepare: onApps(member({ layout: { order: [], hidden: ['baby'] } }), async (p) => {
       await p.getByRole('button', { name: 'Arrange' }).click();
-      await p.evaluate(() => window.scrollTo(0, 0));
-    },
+    }),
   });
 });
+
+test('today', ({ page }) =>
+  captureScreenshot(page, 'today', {
+    fixedTime,
+    prepare: preview(member(), (p) => expect(p.getByRole('link', { name: /Gutter cleaning/ })).toContainText('Overdue by 4 days')),
+  }));
+
+test('phone: today', async ({ page }) => {
+  await phone(page);
+  await captureScreenshot(page, 'phone-today', {
+    fixedTime,
+    prepare: preview(member(), (p) => expect(p.getByRole('link', { name: /Gutter cleaning/ })).toBeVisible()),
+  });
+});
+
+test('calendar', ({ page }) =>
+  captureScreenshot(page, 'calendar', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'Calendar');
+      await expect(p.getByRole('region', { name: 'Tomorrow' })).toBeVisible();
+    }),
+  }));
+
+test('phone: calendar', async ({ page }) => {
+  await phone(page);
+  await captureScreenshot(page, 'phone-calendar', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'Calendar');
+      await expect(p.getByRole('region', { name: 'Tomorrow' })).toBeVisible();
+    }),
+  });
+});
+
+test('contacts', ({ page }) =>
+  captureScreenshot(page, 'contacts', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'Contacts');
+      await expect(p.getByRole('region', { name: 'Jiffy Lube' })).toBeVisible();
+    }),
+  }));
+
+test('contact apps', ({ page }) =>
+  captureScreenshot(page, 'contact-apps', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'Contacts');
+      await p.getByRole('button', { name: 'Choose apps for Example Plumbing' }).click();
+      await expect(p.getByRole('dialog', { name: 'Show Example Plumbing in' })).toBeVisible();
+    }),
+  }));
+
+test('new contact', ({ page }) =>
+  captureScreenshot(page, 'contact-new', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'Contacts');
+      await p.getByRole('button', { name: 'Add contact' }).click();
+      await expect(p.getByRole('dialog', { name: 'New contact' })).toBeVisible();
+    }),
+  }));
+
+test('phone: contacts', async ({ page }) => {
+  await phone(page);
+  await captureScreenshot(page, 'phone-contacts', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'Contacts');
+      await expect(p.getByRole('region', { name: 'Example Animal Hospital' })).toBeVisible();
+    }),
+  });
+});
+
