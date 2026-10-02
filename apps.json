@@ -37,8 +37,7 @@
     "repo": "pet",
     "site": "huishouden-pet",
     "webApp": "Pet",
-    "glyph": "paw",
-    "tile": false
+    "glyph": "paw"
   },
   {
     "name": "Home",
