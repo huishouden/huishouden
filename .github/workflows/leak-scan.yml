@@ -30,9 +30,10 @@ jobs:
         run: |
           config=()
           [ -f .gitleaks.toml ] && config=(--config .gitleaks.toml)
-          range=()
-          # A first push or a manual run has no usable base; scan everything then.
           if [ -n "$BASE" ] && [ "$BASE" != "0000000000000000000000000000000000000000" ]; then
-            range=(--log-opts "$BASE..$HEAD")
+            gitleaks git . --redact --no-banner "${config[@]}" --log-opts "$BASE..$HEAD"
+          else
+            # Manual runs and first pushes have no base commit: scan the files as they are now,
+            # not all history (history is audited once, when a repo is published).
+            gitleaks dir . --redact --no-banner "${config[@]}"
           fi
-          gitleaks git . --redact --no-banner "${config[@]}" "${range[@]}"
