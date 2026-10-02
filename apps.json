@@ -12,8 +12,8 @@
     "description": "Shared lists and chores",
     "repo": "tasks",
     "site": "huishouden-tasks",
-    "glyph": "check",
-    "provision": false
+    "webApp": "Tasks",
+    "glyph": "check"
   },
   {
     "name": "Home",
