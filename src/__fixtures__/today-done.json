@@ -1,0 +1,25 @@
+{
+  "now": "2026-10-01T09:00:00",
+  "me": "sam@example.com",
+  "profiles": { "sam@example.com": { "name": "Sam Example" }, "alex@example.com": { "name": "Alex Example" } },
+  "items": [
+    { "id": "d1", "app": "pet", "ref": "feed:am", "kind": "feeding", "title": "Breakfast", "who": "Biscuit", "start": "2026-10-01T07:00", "allDay": false, "status": "done", "updatedAt": "2026-10-01T07:05", "by": "alex@example.com" },
+    { "id": "d2", "app": "home", "ref": "job:gutters", "kind": "due", "title": "Gutter cleaning", "start": "2026-09-27T00:00", "allDay": true, "status": "done", "updatedAt": "2026-10-01T08:40", "by": "sam@example.com" },
+    { "id": "d3", "app": "bills", "ref": "bill:water", "kind": "bill", "title": "Water bill", "start": "2026-10-01T00:00", "allDay": true, "status": "done", "updatedAt": "2026-09-29T18:00", "by": "jo@example.com" },
+    { "id": "d4", "app": "pet", "ref": "med:heartworm", "kind": "medicine", "title": "Heartworm chew", "start": "2026-09-30T19:00", "allDay": false, "status": "done", "updatedAt": "2026-09-30T19:10", "by": "alex@example.com" },
+    { "id": "o1", "app": "car", "ref": "job:oil", "kind": "due", "title": "Oil change", "start": "2026-09-29T00:00", "allDay": true, "status": "upcoming", "updatedAt": "2026-09-20T10:00", "by": "sam@example.com" },
+    { "id": "s1", "app": "pet", "ref": "med:course", "kind": "medicine", "title": "Antibiotic course", "start": "2026-09-28T00:00", "end": "2026-10-05T00:00", "allDay": true, "updatedAt": "2026-09-28T10:00", "by": "sam@example.com" },
+    { "id": "t1", "app": "pet", "ref": "appt:checkup", "kind": "appointment", "title": "Yearly checkup", "start": "2026-10-01T15:30", "end": "2026-10-01T16:15", "allDay": false, "updatedAt": "2026-09-20T10:00", "by": "sam@example.com" }
+  ],
+  "expected": {
+    "open": [
+      { "id": "o1", "group": "overdue" },
+      { "id": "t1", "group": "today" }
+    ],
+    "done": [
+      { "id": "d2", "line": "Done by you at 8:40 AM" },
+      { "id": "d1", "line": "Done by Alex at 7:05 AM" },
+      { "id": "d3", "line": "Done" }
+    ]
+  }
+}

@@ -37,11 +37,17 @@ export type HouseholdView =
  * and smoke tests set it directly with `window.__hubPreview(state)` (invented data, no sign-in).
  */
 export type HubState =
-  /** Before sign-in is known: nothing yet, so members never glimpse the signed-out introduction. */
-  | { auth: 'starting'; layout?: PortalLayout }
-  | { auth: 'signed-out'; layout?: PortalLayout }
+  /**
+   * Before sign-in is known: nothing yet, so members never glimpse the signed-out introduction.
+   * `remembered`: this device last saw a member signed in (src/memberHint.ts), so the hub lays out
+   * Today while the session restores.
+   */
+  | { auth: 'starting'; layout?: PortalLayout; remembered?: boolean }
+  | { auth: 'signed-out'; layout?: PortalLayout; remembered?: undefined }
   | {
       auth: 'signed-in';
+      /** As for 'starting': keeps the member layout while the household loads. */
+      remembered?: boolean;
       user: HubUser;
       /** Lowercase email. */
       me: string;

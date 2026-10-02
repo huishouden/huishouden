@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { expectCleanLoad, expectGoogleSignInPopup, expectHuishoudenFrame, expectInstallable } from '@huishouden/pwa-kit/e2e';
 import { readFileSync } from 'node:fs';
-import { member, showHub } from './fixtures/hub';
+import { MEMBER_HINT } from '../src/memberHint';
+import { markedDone, member, restoring, showHub } from './fixtures/hub';
 
 const registry: { repo: string; site: string; tile?: boolean }[] = JSON.parse(readFileSync(new URL('../apps.json', import.meta.url), 'utf8'));
 const tileApps = registry.filter((app) => app.tile !== false);
@@ -86,6 +87,43 @@ test('members land on Today: overdue first, each item linking to its app', async
   await expect(gutters).toContainText('Overdue by 4 days');
   await expect(gutters).toHaveAttribute('href', 'https://huishouden-home.web.app/');
   await expect(page.getByRole('region', { name: 'By app' })).toContainText('Home');
+  // The kind is the icon, the app its badge; both read out. A title naming who leaves `who` out.
+  await expect(gutters).toContainText('Due. Open in Home');
+  await expect(page.getByRole('link', { name: /Yearly checkup/ })).toContainText('Biscuit · Example Animal Hospital');
+  // An ongoing course is calendar context, not something to do today.
+  await expect(page.getByRole('link', { name: /Antibiotic course/ })).toHaveCount(0);
+});
+
+test("today's done items fold away at the bottom, and items flip there when an app marks them done", async ({ page }) => {
+  await page.clock.setFixedTime('2026-10-01T09:00:00');
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await showHub(page, member());
+  const summary = page.getByText(/^Done today \(\d+\)$/);
+  await expect(summary).toHaveText('Done today (2)');
+  const done = page.getByRole('list', { name: 'Done today' });
+  await expect(done).toBeHidden();
+  await summary.click();
+  await expect(done.getByRole('listitem')).toHaveText([/Take out the recycling.*Done by you at 8:15/, /Biscuit's breakfast1 cup dry food · Done by Alex at 7:05/]);
+  await expect(done.getByText('Take out the recycling')).toHaveCSS('text-decoration-line', 'line-through');
+  // The live agenda updates within seconds of an app's write; the preview stands in for it.
+  await page.evaluate((s) => window.__hubPreview!(s), member({ agenda: markedDone('a2', 'alex@example.com') }));
+  await expect(page.getByText('Done today (3)')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Today' })).not.toContainText('Water bill');
+  await expect(done.getByRole('listitem').first()).toContainText('Water bill');
+});
+
+test('a device that remembers a member lays out Today while sign-in restores, and falls back when the session is gone', async ({ page }) => {
+  await page.addInitScript((key) => localStorage.setItem(key, JSON.stringify({ household: 'h1' })), MEMBER_HINT);
+  await page.goto('/');
+  // No session in a test browser: the hint is dropped and the introduction shows.
+  await expect(page.getByRole('heading', { name: 'How it works' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Sections' })).toHaveCount(0);
+  expect(await page.evaluate((key) => localStorage.getItem(key), MEMBER_HINT)).toBeNull();
+  await page.evaluate((s) => window.__hubPreview!(s), restoring);
+  const tabs = page.getByRole('navigation', { name: 'Sections' });
+  await expect(tabs.getByRole('button', { name: 'Today' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByText("Loading the household's day.")).toBeAttached();
+  await expect(page.locator('#household')).toHaveCount(0);
 });
 
 test('the calendar lists items by day and filters by app', async ({ page }) => {
@@ -125,5 +163,14 @@ test("members keep the household's food preferences, with every member listed", 
   await dialog.getByRole('button', { name: 'Save' }).click();
   await expect(food.getByRole('listitem').filter({ hasText: 'Kim' })).toContainText('Dairy-free');
   await food.getByRole('button', { name: 'Remove butter' }).click();
+  await expect(food).toContainText('Meal ideas keep to the lowest heat anyone picked.');
+  const sam = food.getByRole('group', { name: "Sam's spice" });
+  await expect(sam.getByRole('button', { name: 'A little' })).toHaveAttribute('aria-pressed', 'true');
+  const robin = food.getByRole('group', { name: "Robin's spice" });
+  await expect(robin.getByRole('button', { pressed: true })).toHaveCount(0);
+  await robin.getByRole('button', { name: 'No heat' }).click();
+  await expect(robin.getByRole('button', { name: 'No heat' })).toHaveAttribute('aria-pressed', 'true');
+  await robin.getByRole('button', { name: 'No heat' }).click();
+  await expect(robin.getByRole('button', { pressed: true })).toHaveCount(0);
   await expect(food.getByRole('list', { name: 'Kitchen basics' })).not.toContainText('butter');
 });

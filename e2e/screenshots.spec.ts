@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { captureScreenshot } from '@huishouden/pwa-kit/e2e';
 import type { HubState } from '../src/hub';
-import { me, member, noHousehold, showHub } from './fixtures/hub';
+import { me, member, noHousehold, restoring, showHub } from './fixtures/hub';
 
 // README images, refreshed by CI after each deploy (only committed when they change). Signed-in
 // screens show invented data handed to the app (window.__hubPreview); nothing reaches Firestore.
@@ -154,6 +154,23 @@ test('phone: today', async ({ page }) => {
   await captureScreenshot(page, 'phone-today', {
     fixedTime,
     prepare: preview(member(), (p) => expect(p.getByRole('link', { name: /Gutter cleaning/ })).toBeVisible()),
+  });
+});
+
+test('today: done items', ({ page }) =>
+  captureScreenshot(page, 'today-done', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await p.getByText('Done today (2)').click();
+      await p.getByRole('list', { name: 'Done today' }).scrollIntoViewIfNeeded();
+    }),
+  }));
+
+test('phone: today while sign-in restores', async ({ page }) => {
+  await phone(page);
+  await captureScreenshot(page, 'phone-today-restoring', {
+    fixedTime,
+    prepare: preview(restoring, (p) => expect(p.getByText("Loading the household's day.")).toBeAttached()),
   });
 });
 
