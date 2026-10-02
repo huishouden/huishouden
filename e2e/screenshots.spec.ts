@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { captureScreenshot } from '@huishouden/pwa-kit/e2e';
 import type { HubState } from '../src/hub';
-import { me, member, noHousehold, restoring, showHub } from './fixtures/hub';
+import { helper, me, member, noHousehold, restoring, showHub } from './fixtures/hub';
 
 // README images, refreshed by CI after each deploy (only committed when they change). Signed-in
 // screens show invented data handed to the app (window.__hubPreview); nothing reaches Firestore.
@@ -112,6 +112,43 @@ test('inviting someone', ({ page }) =>
       await p.getByRole('button', { name: 'Invite', exact: true }).click();
       await expect(p.getByText('robin@example.com is invited. Let them know by email:')).toBeVisible();
       await p.locator('#household').scrollIntoViewIfNeeded();
+    }),
+  }));
+
+// Roles: an admin sets them per member; a helper sees no money and changes no settings.
+test('household roles', ({ page }) =>
+  captureScreenshot(page, 'household-roles', {
+    fixedTime,
+    prepare: onApps(member(), async (p) => {
+      await p.getByText('What each role can do').click();
+      await expect(p.getByLabel('Role for jo@example.com')).toHaveValue('helper');
+      await p.locator('#household').scrollIntoViewIfNeeded();
+    }),
+  }));
+
+test('a helper’s apps', ({ page }) =>
+  captureScreenshot(page, 'helper-apps', {
+    fixedTime,
+    prepare: onApps(helper(), async (p) => {
+      await expect(p.getByText('Only admins can invite or remove people and set roles.')).toBeVisible();
+    }),
+  }));
+
+test('a helper’s household and food', ({ page }) =>
+  captureScreenshot(page, 'helper-household', {
+    fixedTime,
+    prepare: onApps(helper(), async (p) => {
+      await p.locator('#household').scrollIntoViewIfNeeded();
+    }),
+  }));
+
+test('a private contact', ({ page }) =>
+  captureScreenshot(page, 'contact-private', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'Contacts');
+      await p.getByRole('button', { name: 'Edit Example Pediatrics' }).click();
+      await p.getByText('Only admins and members').click();
     }),
   }));
 

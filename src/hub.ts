@@ -2,6 +2,7 @@ import type { AgendaItem } from '@huishouden/pwa-kit/agenda';
 import type { Contact, ContactInput } from '@huishouden/pwa-kit/contacts';
 import type { FoodInput, FoodPreferences } from '@huishouden/pwa-kit/food';
 import type { Invitation } from '@huishouden/pwa-kit/invite';
+import { householdRole, type Role } from '@huishouden/pwa-kit/roles';
 import type { PortalLayout } from './apps';
 
 /** The signed-in person as the app bar shows them. */
@@ -23,6 +24,8 @@ export interface ReadyHousehold {
   /** Lowercase emails. */
   members: string[];
   joined: string[];
+  /** Roles written out; anyone missing is a member, except the creator (first), an admin. */
+  roles: Record<string, Role>;
   profiles: Record<string, MemberProfile>;
 }
 
@@ -68,9 +71,10 @@ export interface HubActions {
   signOut(): Promise<void>;
   createHousehold(name: string): Promise<void>;
   renameHousehold(name: string): Promise<void>;
-  /** Adds the member and returns the invitation to offer by email. */
-  invite(email: string): Promise<Invitation>;
+  /** Adds the member with a role (admins only) and returns the invitation to offer by email. */
+  invite(email: string, role: Role): Promise<Invitation>;
   removeMember(email: string): Promise<void>;
+  setRole(email: string, role: Role): Promise<void>;
   sendInviteEmail(invitation: Invitation): Promise<void>;
   saveLayout(layout: PortalLayout): Promise<void>;
   addContact(input: ContactInput): Promise<void>;
@@ -91,3 +95,6 @@ export function suggestedHouseholdName(displayName: string | null | undefined): 
 
 export const isMember = (s: HubState): s is Extract<HubState, { auth: 'signed-in' }> & { household: ReadyHousehold } =>
   s.auth === 'signed-in' && s.household.status === 'ready';
+
+/** The signed-in person's role in their household; null without one. */
+export const myRole = (s: HubState): Role | null => (isMember(s) ? householdRole(s.household, s.me) : null);

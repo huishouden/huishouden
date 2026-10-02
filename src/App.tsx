@@ -4,7 +4,8 @@ import { SectionTabs, Toast, useToast, type Tab } from '@huishouden/pwa-kit/reac
 import { APPS, arrangeTiles, type PortalLayout } from './apps';
 import { useLiveHub } from './data/live';
 import { usePreview } from './data/preview';
-import { isMember, type HubState } from './hub';
+import { can, MONEY_APPS } from '@huishouden/pwa-kit/roles';
+import { isMember, myRole, type HubState } from './hub';
 import { restoringMember } from './memberHint';
 import { AppsScreen } from './screens/AppsScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
@@ -108,7 +109,10 @@ export default function App() {
   );
 
   const user = state.auth === 'starting' ? undefined : state.auth === 'signed-out' ? null : state.user;
-  const ordered = arrangeTiles(APPS, state.layout).all;
+  const role = myRole(state);
+  // Helpers and kids don't see Spending or Bills anywhere in the hub.
+  const visibleApps = isMember(state) && !can(role, 'see-money') ? APPS.filter((a) => !MONEY_APPS.includes(a.repo)) : APPS;
+  const ordered = arrangeTiles(visibleApps, state.layout).all;
   const signedIn = state.auth === 'signed-in' ? state : undefined;
 
   return (
@@ -122,7 +126,7 @@ export default function App() {
           <AppsScreen
             state={state}
             actions={actions}
-            apps={APPS}
+            apps={visibleApps}
             hour={hour}
             signInError={signInError}
             onSignIn={signIn}
@@ -141,7 +145,9 @@ export default function App() {
           />
         )}
         {tab === 'calendar' && <CalendarScreen agenda={signedIn?.agenda} apps={ordered} now={now} />}
-        {tab === 'contacts' && <ContactsScreen contacts={signedIn?.contacts} apps={ordered} actions={actions} notify={notify} fail={fail} />}
+        {tab === 'contacts' && (
+          <ContactsScreen contacts={signedIn?.contacts} apps={ordered} actions={actions} notify={notify} fail={fail} me={signedIn?.me} role={role} />
+        )}
       </main>
       <footer className="mx-auto w-full max-w-[1200px] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-sm text-stone-600 sm:px-6">
         <a

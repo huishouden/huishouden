@@ -16,6 +16,7 @@ export const household: ReadyHousehold = {
   name: "Sam's household",
   members: [me, 'alex@example.com', 'jo@example.com'],
   joined: [me, 'alex@example.com'],
+  roles: { 'jo@example.com': 'helper' },
   profiles: { [me]: { name: 'Sam Example' }, 'alex@example.com': { name: 'Alex Example' } },
 };
 
@@ -95,3 +96,14 @@ export async function showHub(page: Page, state: HubState) {
   await expect(page.getByRole('heading', { name: 'How it works' })).toBeVisible();
   await page.evaluate((s) => window.__hubPreview!(s), state);
 }
+
+/** Jo, the household's helper: no money, nothing private, no settings. */
+export const helper = (): HubState => ({
+  auth: 'signed-in',
+  user: { name: 'Jo Example', email: 'jo@example.com', photoURL: null },
+  me: 'jo@example.com',
+  household: { ...household, joined: [...household.joined, 'jo@example.com'], profiles: { ...household.profiles, 'jo@example.com': { name: 'Jo Example' } } },
+  contacts: contacts.filter((c) => !c.private),
+  agenda: agenda.filter((i) => i.app !== 'bills' && i.app !== 'spending'),
+  food,
+});

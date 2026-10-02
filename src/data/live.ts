@@ -15,7 +15,8 @@ import {
   type HouseholdState,
   type Profile,
 } from '@huishouden/pwa-kit/household';
-import { addContact, deleteContact, restoreContact, updateContact, watchContacts, type Contact } from '@huishouden/pwa-kit/contacts';
+import { addContact, deleteContact, markUnflaggedOpen, restoreContact, updateContact, watchContacts, type Contact } from '@huishouden/pwa-kit/contacts';
+import { can, householdRole, isRestricted, setRole } from '@huishouden/pwa-kit/roles';
 import { sendInviteEmail } from '@huishouden/pwa-kit/invite';
 import { agendaRange, watchAgenda, type AgendaItem } from '@huishouden/pwa-kit/agenda';
 import { toYmd } from '@huishouden/pwa-kit/time';
@@ -114,6 +115,10 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
 
   const ready = household.status === 'ready' ? household.household : undefined;
   const householdId = ready?.id;
+  const role = householdRole(ready, email);
+  // Helpers and kids may read only contacts and agenda items not marked private, and must ask for just those.
+  const restricted = isRestricted(role);
+  const seesPrivate = can(role, 'see-private');
 
   // Remember on this device whether a member is signed in, for the next load (src/memberHint.ts).
   useEffect(() => {
@@ -137,7 +142,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
     saveMyProfile(db, householdId, user).catch(() => {});
     const stops = [
       watchProfiles(db, householdId, setProfiles),
-      watchContacts(db, householdId, setContacts, { onError: () => setContacts([]) }),
+      watchContacts(db, householdId, setContacts, { restricted, onError: () => setContacts([]) }),
       watchFood(db, householdId, setFood),
       onSnapshot(
         doc(db, 'households', householdId, 'settings', 'portal'),
@@ -152,7 +157,14 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
       ),
     ];
     return () => stops.forEach((stop) => stop());
-  }, [householdId, user]);
+  }, [householdId, user, restricted]);
+
+  // Contacts saved before the private flag are hidden from helpers and kids until written with
+  // `private: false`; an admin's or member's portal does that once.
+  useEffect(() => {
+    if (!householdId || !seesPrivate || !contacts?.some((c) => c.private === undefined)) return;
+    markUnflaggedOpen(db, householdId, 'contacts', contacts).catch(() => {});
+  }, [householdId, seesPrivate, contacts]);
 
   // The agenda from a week ago (overdue items whatever their age) to as far ahead as apps publish,
   // followed again each new day so a tablet left open keeps the right window.
@@ -160,8 +172,8 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
     setAgenda(undefined);
     if (!householdId) return;
     const { from, to } = agendaRange(Date.now(), AGENDA_DAYS, 7);
-    return watchAgenda(db, householdId, { from, to, onError: () => setAgenda([]) }, setAgenda);
-  }, [householdId, today]);
+    return watchAgenda(db, householdId, { from, to, restricted, onError: () => setAgenda([]) }, setAgenda);
+  }, [householdId, today, restricted]);
 
   const state = useMemo((): HubState => {
     if (user === undefined) return { auth: 'starting', layout, remembered };
@@ -179,6 +191,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         name: h.name,
         members: h.members,
         joined: h.joined,
+        roles: h.roles ?? {},
         profiles: Object.fromEntries([...profiles].map(([k, p]) => [k, { name: p.name, photoURL: p.photoURL }])),
       };
     }
@@ -227,11 +240,11 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
           throw words(e, "Couldn't rename the household");
         });
       },
-      async invite(to) {
-        const { id, me } = need();
+      async invite(to, inviteRole) {
+        const { me } = need();
         const address = normalizeEmail(to);
-        await inviteMember(db, id, address).catch((e) => {
-          throw words(e, "Couldn't invite them");
+        await inviteMember(db, ready!, address, inviteRole).catch((e) => {
+          throw e instanceof Error && !('code' in e) ? e : words(e, "Couldn't invite them");
         });
         track('invite member');
         return {
@@ -242,9 +255,15 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
         };
       },
       async removeMember(who) {
-        const { id } = need();
-        await removeMember(db, id, who).catch((e) => {
+        need();
+        await removeMember(db, ready!, who).catch((e) => {
           throw words(e, "Couldn't remove them");
+        });
+      },
+      async setRole(who, next) {
+        need();
+        await setRole(db, ready!, who, next).catch((e) => {
+          throw words(e, "Couldn't change their role");
         });
       },
       async sendInviteEmail(invitation) {

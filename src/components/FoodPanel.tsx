@@ -14,6 +14,7 @@ import {
   type SpiceTolerance,
 } from '@huishouden/pwa-kit/food';
 import { Chip, Dialog, Field, cardClass, deleteButton, ghostButton, iconButton, inputClass, primaryButton, secondaryButton } from '@huishouden/pwa-kit/react/ui';
+import { RoleNote } from '@huishouden/pwa-kit/react/roles';
 import type { HubActions, ReadyHousehold } from '../hub';
 
 interface Props {
@@ -21,6 +22,8 @@ interface Props {
   food: FoodPreferences | undefined;
   actions: HubActions;
   fail: (message: string) => void;
+  /** Helpers and kids read the household's food preferences but don't change them. */
+  canEdit?: boolean;
 }
 
 /** "Vegetarian, Nut allergy · avoids cilantro and olives", or that there's nothing to plan around. */
@@ -34,7 +37,7 @@ export function personSummary(p: FoodPerson): string {
  * an account, each with diets, foods to avoid and a note; and the kitchen basics recipes may assume.
  * One document for the household (`settings/food`), read by every app that suggests meals.
  */
-export function FoodPanel({ household, food, actions, fail }: Props) {
+export function FoodPanel({ household, food, actions, fail, canEdit = true }: Props) {
   const [editing, setEditing] = useState<FoodPerson | 'new' | null>(null);
   const [pantryItem, setPantryItem] = useState('');
   const members = household.members.map((email) => ({ email, name: household.profiles[email]?.name }));
@@ -63,9 +66,11 @@ export function FoodPanel({ household, food, actions, fail }: Props) {
     <section aria-label="Food" className={`${cardClass} max-w-2xl p-6`}>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-semibold text-forest-700">Food</h2>
-        <button type="button" className={secondaryButton} onClick={() => setEditing('new')} disabled={people.length >= FOOD_LIMITS.people}>
-          <UserPlus size={18} aria-hidden="true" /> Add someone
-        </button>
+        {canEdit && (
+          <button type="button" className={secondaryButton} onClick={() => setEditing('new')} disabled={people.length >= FOOD_LIMITS.people}>
+            <UserPlus size={18} aria-hidden="true" /> Add someone
+          </button>
+        )}
       </div>
       <p className="mb-3 text-stone-600">Who eats at home, and what suits them. Meal ideas in Tasks follow these.</p>
       <p className="mb-3 text-sm text-stone-600">Meal ideas keep to the lowest heat anyone picked.</p>
@@ -84,10 +89,15 @@ export function FoodPanel({ household, food, actions, fail }: Props) {
                   <span className="block text-stone-600">{personSummary(p)}</span>
                   {p.note && <span className="block text-sm text-stone-600">{p.note}</span>}
                 </span>
-                <button type="button" className={iconButton} aria-label={`Edit ${p.name}'s food`} onClick={() => setEditing(p)}>
-                  <Pencil size={18} />
-                </button>
+                {canEdit && (
+                  <button type="button" className={iconButton} aria-label={`Edit ${p.name}'s food`} onClick={() => setEditing(p)}>
+                    <Pencil size={18} />
+                  </button>
+                )}
               </div>
+              {!canEdit ? (
+                p.spice && <p className="mt-1 text-sm text-stone-600">Spice: {SPICE_LABELS[p.spice]}</p>
+              ) : (
               <div className="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label={`${p.name}'s spice`}>
                 <span className="mr-1 text-sm font-medium text-stone-700" aria-hidden="true">
                   Spice
@@ -98,6 +108,7 @@ export function FoodPanel({ household, food, actions, fail }: Props) {
                   </Chip>
                 ))}
               </div>
+              )}
             </li>
           ))}
         </ul>
@@ -109,18 +120,24 @@ export function FoodPanel({ household, food, actions, fail }: Props) {
         {pantry.map((item) => (
           <li key={item} className="inline-flex min-h-11 items-center gap-1 rounded-full border border-stone-200 bg-white pr-1 pl-4 text-sm font-medium text-stone-700">
             {item}
-            <button
-              type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-600 hover:bg-stone-100"
-              aria-label={`Remove ${item}`}
-              onClick={() => void save({ pantryAssumed: pantry.filter((p) => p !== item) })}
-            >
-              <X size={16} />
-            </button>
+            {canEdit ? (
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-600 hover:bg-stone-100"
+                aria-label={`Remove ${item}`}
+                onClick={() => void save({ pantryAssumed: pantry.filter((p) => p !== item) })}
+              >
+                <X size={16} />
+              </button>
+            ) : (
+              <span className="w-3" />
+            )}
           </li>
         ))}
         {pantry.length === 0 && <li className="text-stone-600">None: meal ideas list everything to buy.</li>}
       </ul>
+      {!canEdit && <RoleNote action="change-settings" className="mt-3" />}
+      {canEdit && (
       <form className="flex flex-wrap gap-2" onSubmit={addPantry}>
         <input
           className={`${inputClass} min-w-[200px] flex-1`}
@@ -140,6 +157,7 @@ export function FoodPanel({ household, food, actions, fail }: Props) {
           </button>
         )}
       </form>
+      )}
 
       {editing && (
         <PersonDialog
