@@ -62,7 +62,6 @@
     "repo": "bills",
     "site": "huishouden-bills",
     "webApp": "Bills",
-    "glyph": "card",
-    "tile": false
+    "glyph": "card"
   }
 ]
