@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/huishouden/portal/compare/v1.6.0...v2.0.0) (2026-10-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* the household hub on React: Today, Calendar, Contacts and Apps ([#27](https://github.com/huishouden/portal/issues/27))
+
+### Features
+
+* the household hub on React: Today, Calendar, Contacts and Apps ([#27](https://github.com/huishouden/portal/issues/27)) ([4fafb30](https://github.com/huishouden/portal/commit/4fafb30fadf8b38923893c228371dd6213a67bf5))
+
 ## [1.6.0](https://github.com/huishouden/portal/compare/v1.5.1...v1.6.0) (2026-10-02)
 
 
