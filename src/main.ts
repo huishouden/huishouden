@@ -3,7 +3,7 @@ import { APPS } from './apps';
 import '@huishouden/pwa-kit/theme.css';
 import './style.css';
 import { mountHouseholdPanel } from './household-panel';
-import { mountAccountChip } from './account-chip';
+import { mountAppBar } from './app-bar';
 
 registerSW({ immediate: true });
 
@@ -39,4 +39,4 @@ for (const app of APPS) {
 }
 
 mountHouseholdPanel(document.getElementById('household')!);
-mountAccountChip(document.getElementById('account')!);
+mountAppBar(document.querySelector('hh-app-bar')!);
