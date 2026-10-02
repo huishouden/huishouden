@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/huishouden/portal/compare/v1.1.0...v1.2.0) (2026-10-02)
+
+
+### Features
+
+* household members show their name and photo; invites can be emailed from your Gmail ([#7](https://github.com/huishouden/portal/issues/7)) ([7af1d0b](https://github.com/huishouden/portal/commit/7af1d0b30859c642c11f04aa8f0c5b164a7afc05))
+
 ## [1.1.0](https://github.com/huishouden/portal/compare/v1.0.0...v1.1.0) (2026-10-02)
 
 
