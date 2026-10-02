@@ -2,12 +2,16 @@ import { useMemo, useState } from 'react';
 import { LayoutGrid, UserPlus } from 'lucide-react';
 import { groupContacts, type Contact } from '@huishouden/pwa-kit/contacts';
 import { ContactCard, ContactDialog } from '@huishouden/pwa-kit/react/contacts';
+import { can, type Role } from '@huishouden/pwa-kit/roles';
 import { Checkbox, Chip, Dialog, cardClass, ghostButton, primaryButton } from '@huishouden/pwa-kit/react/ui';
 import type { HouseholdApp } from '../apps';
 import type { HubActions } from '../hub';
 
 interface Props {
   contacts: Contact[] | undefined;
+  /** The signed-in person (lowercase email) and their role: helpers and kids change only contacts they added. */
+  me?: string;
+  role?: Role | null;
   /** Every app in the household's order; the ones with contact roles show contacts. */
   apps: HouseholdApp[];
   actions: HubActions;
@@ -23,7 +27,8 @@ const unique = (list: string[]) => [...new Map(list.map((r) => [r.toLowerCase(),
  * Every contact the household keeps, whichever apps show it: grouped by role, tagged with its apps,
  * and added or edited with the same dialog the apps use. New contacts show in no app until chosen.
  */
-export function ContactsScreen({ contacts, apps, actions, notify, fail }: Props) {
+export function ContactsScreen({ contacts, apps, actions, notify, fail, me, role = 'member' }: Props) {
+  const mayChange = (c: Contact) => can(role, 'edit-others') || (!!me && c.by === me);
   const contactApps = useMemo(() => apps.filter((a) => a.contactRoles.length > 0), [apps]);
   const nameOf = useMemo(() => new Map(apps.map((a) => [a.repo, a.name])), [apps]);
   const allRoles = useMemo(() => unique(contactApps.flatMap((a) => a.contactRoles)), [contactApps]);
@@ -88,11 +93,15 @@ export function ContactsScreen({ contacts, apps, actions, notify, fail }: Props)
               <ContactCard
                 contact={c}
                 role={g.role}
-                onEdit={() => setEditing(c)}
-                onDelete={() => {
-                  void run(actions.deleteContact(c));
-                  notify(`Deleted ${c.name}`, () => void run(actions.restoreContact(c)));
-                }}
+                onEdit={mayChange(c) ? () => setEditing(c) : undefined}
+                onDelete={
+                  mayChange(c)
+                    ? () => {
+                        void run(actions.deleteContact(c));
+                        notify(`Deleted ${c.name}`, () => void run(actions.restoreContact(c)));
+                      }
+                    : undefined
+                }
               />
               <div className="rounded-b-2xl border border-t-0 border-stone-200 bg-white px-5 pb-2 shadow-sm">
                 <div className="flex flex-wrap items-center gap-2 border-t border-stone-200 pt-2">
@@ -107,9 +116,11 @@ export function ContactsScreen({ contacts, apps, actions, notify, fail }: Props)
                     ))
                   )}
                 </span>
-                <button type="button" className={`${ghostButton} text-forest-700`} onClick={() => setChoosing(c)} aria-label={`Choose apps for ${c.name}`}>
-                  <LayoutGrid size={18} aria-hidden="true" /> Apps
-                </button>
+                {mayChange(c) && (
+                  <button type="button" className={`${ghostButton} text-forest-700`} onClick={() => setChoosing(c)} aria-label={`Choose apps for ${c.name}`}>
+                    <LayoutGrid size={18} aria-hidden="true" /> Apps
+                  </button>
+                )}
                 </div>
               </div>
             </div>
@@ -123,6 +134,7 @@ export function ContactsScreen({ contacts, apps, actions, notify, fail }: Props)
           app=""
           roles={rolesFor(editing)}
           namePlaceholder="Example Plumbing"
+          canMarkPrivate={can(role, 'see-private')}
           onSave={(input) => {
             if (editing === 'new') {
               const apps = filter.kind === 'app' ? [filter.repo] : [];

@@ -1,0 +1,46 @@
+import { expect, test } from '@playwright/test';
+import { signInTestUser } from '@huishouden/pwa-kit/e2e';
+import { seedTestHousehold } from '@huishouden/pwa-kit/staging';
+
+// Signed in as invented test users on the staging site (pwa-kit STANDARD.md "Staging"): the real
+// staging Firestore and rules. test-a is the household's admin, test-helper its helper.
+test.skip(!process.env.HH_STAGING_SA, 'signed-in tests run against staging, in CI');
+
+// Other apps' runs may reseed the household with an older kit that has no helper: put it back.
+test.beforeAll(async () => {
+  await seedTestHousehold({ accessToken: process.env.HH_STAGING_ACCESS_TOKEN! });
+});
+
+const appsTab = (page: import('@playwright/test').Page) =>
+  page.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: 'Apps' }).click();
+
+test('the admin sees each member’s role and can change it', async ({ page }) => {
+  await signInTestUser(page, { email: 'test-a@example.com' });
+  await appsTab(page);
+  await expect(page.getByLabel('Role for test-helper@example.com').or(page.getByLabel('Role for Test Helper'))).toHaveValue('helper', { timeout: 20_000 });
+  await expect(page.getByRole('link', { name: /Spending/ })).toBeVisible();
+});
+
+test('a helper is told who manages people, sees no money, and can add a contact of their own', async ({ page }) => {
+  await signInTestUser(page, { email: 'test-helper@example.com' });
+  await appsTab(page);
+  // Refused: managing people and roles, settings, money.
+  await expect(page.getByText('Only admins can invite or remove people and set roles.')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByPlaceholder('Their Google account email')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Rename' })).toHaveCount(0);
+  await expect(page.getByText('Only admins and members can change settings.')).toBeVisible();
+  await expect(page.getByRole('link', { name: /Spending/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /Bills/ })).toHaveCount(0);
+
+  // Permitted: a contact of their own, which they may also delete.
+  const name = `Helper contact ${Date.now()}`;
+  await page.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: 'Contacts' }).click();
+  await page.getByRole('button', { name: 'Add contact' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('Only admins and members')).toHaveCount(0);
+  await dialog.getByLabel('Name').fill(name);
+  await dialog.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('region', { name })).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('button', { name: `Delete ${name}` }).click();
+  await expect(page.getByRole('region', { name })).toHaveCount(0);
+});

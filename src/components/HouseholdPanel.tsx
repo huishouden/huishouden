@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { inviteMailto, type Invitation } from '@huishouden/pwa-kit/invite';
 import { cardClass, ghostButton, inputClass, linkClass, primaryButton } from '@huishouden/pwa-kit/react/ui';
+import { ROLE_DESCRIPTIONS, ROLE_LABELS, can, householdRole, type Role } from '@huishouden/pwa-kit/roles';
+import { RoleList, RoleNote, RoleSelect } from '@huishouden/pwa-kit/react/roles';
 import { MAX_NAME, type HubActions, type HubState, type ReadyHousehold } from '../hub';
 
 type SignedIn = Extract<HubState, { auth: 'signed-in' }>;
@@ -15,8 +17,9 @@ interface Props {
 const textLink = 'min-h-11 font-medium text-forest-700 underline underline-offset-4 hover:text-forest-600';
 
 /**
- * The household: starting one, renaming it, who is in it (their own names and photos), and inviting
- * more. Membership here is what every household app checks, so an invite opens all of them at once.
+ * The household: starting one, renaming it, who is in it (their own names and photos) with their
+ * roles, and inviting more. Membership here is what every household app checks, so an invite opens
+ * all of them at once. Only admins invite, remove and set roles; the rules refuse anyone else.
  */
 export function HouseholdPanel({ state, actions, notify, fail }: Props) {
   const h = state.household;
@@ -155,12 +158,16 @@ function Household({
   const [renaming, setRenaming] = useState(false);
   const [newName, setNewName] = useState(h.name);
   const [email, setEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<Role>('member');
   const [invited, setInvited] = useState<Invitation>();
   const [sending, setSending] = useState(false);
   const renameInput = useRef<HTMLInputElement>(null);
   const renameButton = useRef<HTMLButtonElement>(null);
   const inviteInput = useRef<HTMLInputElement>(null);
   const solo = h.members.length === 1;
+  const role = householdRole(h, me);
+  const admin = can(role, 'manage-people');
+  const nameOf = (m: string) => h.profiles[m]?.name ?? m;
 
   useEffect(() => {
     if (focusInvite) inviteInput.current?.focus();
@@ -216,17 +223,19 @@ function Household({
       ) : (
         <div className="mb-1 flex items-baseline gap-3">
           <h2 className="text-xl font-semibold text-forest-700">{h.name}</h2>
-          <button
-            ref={renameButton}
-            type="button"
-            className={`${textLink} text-sm`}
-            onClick={() => {
-              setNewName(h.name);
-              setRenaming(true);
-            }}
-          >
-            Rename
-          </button>
+          {can(role, 'change-settings') && (
+            <button
+              ref={renameButton}
+              type="button"
+              className={`${textLink} text-sm`}
+              onClick={() => {
+                setNewName(h.name);
+                setRenaming(true);
+              }}
+            >
+              Rename
+            </button>
+          )}
         </div>
       )}
 
@@ -235,8 +244,9 @@ function Household({
           const p = h.profiles[m];
           const joined = h.joined.includes(m);
           const self = m === me;
+          const theirs = householdRole(h, m) ?? 'member';
           return (
-            <li key={m} className="flex items-center gap-3 border-b border-stone-200 py-2.5">
+            <li key={m} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-stone-200 py-2.5">
               {p?.photoURL ? (
                 <img className="h-10 w-10 shrink-0 rounded-full object-cover" src={p.photoURL} alt="" referrerPolicy="no-referrer" />
               ) : (
@@ -250,13 +260,21 @@ function Household({
                   {self && <span className="font-normal text-stone-600"> (you)</span>}
                 </span>
                 {p?.name && <span className="text-sm text-stone-600">{m}</span>}
+                {!(admin && !self) && <span className="text-sm text-stone-600">{ROLE_LABELS[theirs]}</span>}
               </span>
+              {admin && !self && (
+                <RoleSelect
+                  value={theirs}
+                  label={`Role for ${nameOf(m)}`}
+                  onChange={(next) => void run(() => actions.setRole(m, next), `${nameOf(m)} is now ${next === 'admin' ? 'an' : 'a'} ${ROLE_LABELS[next].toLowerCase()}.`)}
+                />
+              )}
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${joined ? 'bg-forest-100 text-forest-700' : 'bg-terracotta-light text-terracotta-dark'}`}
               >
                 {joined ? 'Signed in' : 'Invited'}
               </span>
-              {!self && (
+              {admin && !self && (
                 <button
                   type="button"
                   className={textLink}
@@ -302,7 +320,24 @@ function Household({
         </div>
       )}
 
-      {solo && <p className="mb-3">Invite the people you live with. They'll get every app when they sign in.</p>}
+      {admin ? (
+        <details className="mb-4">
+          <summary className={`${textLink} inline-flex cursor-pointer items-center`}>What each role can do</summary>
+          <div className="mt-2">
+            <RoleList />
+          </div>
+        </details>
+      ) : (
+        role && (
+          <p className="mb-4 text-sm text-stone-600">
+            You’re {role === 'admin' ? 'an' : 'a'} {ROLE_LABELS[role].toLowerCase()}: {ROLE_DESCRIPTIONS[role].charAt(0).toLowerCase() + ROLE_DESCRIPTIONS[role].slice(1)}
+          </p>
+        )
+      )}
+
+      {!admin && <RoleNote action="manage-people" />}
+      {admin && solo && <p className="mb-3">Invite the people you live with. They'll get every app when they sign in.</p>}
+      {admin && (
       <form
         className="mb-3 flex flex-wrap gap-2"
         onSubmit={(e) => {
@@ -310,8 +345,9 @@ function Household({
           const to = email.trim();
           if (!to) return;
           void run(async () => {
-            const invitation = await actions.invite(to);
+            const invitation = await actions.invite(to, inviteRole);
             setEmail('');
+            setInviteRole('member');
             setInvited(invitation);
           });
         }}
@@ -327,11 +363,13 @@ function Household({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+        <RoleSelect value={inviteRole} label="Their role" onChange={setInviteRole} />
         <button type="submit" className={primaryButton}>
           Invite
         </button>
       </form>
-      {!solo && <p className="text-sm text-stone-600">An invite gives them every household app the next time they sign in with that account.</p>}
+      )}
+      {admin && !solo && <p className="text-sm text-stone-600">An invite gives them every household app the next time they sign in with that account.</p>}
     </>
   );
 }

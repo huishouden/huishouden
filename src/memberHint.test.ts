@@ -13,7 +13,7 @@ const memoryStore = () => {
 };
 
 const user = { name: 'Sam', email: 'sam@example.com', photoURL: null };
-const ready: ReadyHousehold = { status: 'ready', id: 'h1', name: 'Home', members: [], joined: [], profiles: {} };
+const ready: ReadyHousehold = { status: 'ready', id: 'h1', name: 'Home', members: [], joined: [], roles: {}, profiles: {} };
 
 describe('member hint', () => {
   it('remembers the household and forgets it on sign-out', () => {

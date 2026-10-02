@@ -54,12 +54,12 @@ function previewActions(): HubActions {
       setPreview({ auth: 'signed-out' });
     },
     async createHousehold(name) {
-      update((s) => ({ household: { status: 'ready', id: 'preview', name, members: [s.me], joined: [s.me], profiles: {} } }));
+      update((s) => ({ household: { status: 'ready', id: 'preview', name, members: [s.me], joined: [s.me], roles: { [s.me]: 'admin' }, profiles: {} } }));
     },
     async renameHousehold(name) {
       updateHousehold(() => ({ name }));
     },
-    async invite(to) {
+    async invite(to, role) {
       const email = to.trim().toLowerCase();
       let from = '';
       let householdName = '';
@@ -67,12 +67,19 @@ function previewActions(): HubActions {
         from = s.user.name ?? s.me;
         if (s.household.status !== 'ready') return {};
         householdName = s.household.name;
-        return { household: { ...s.household, members: [...new Set([...s.household.members, email])] } };
+        return { household: { ...s.household, members: [...new Set([...s.household.members, email])], roles: { ...s.household.roles, [email]: role } } };
       });
       return { to: email, from, householdName, url: location.origin };
     },
     async removeMember(email) {
-      updateHousehold((h) => (h.status === 'ready' ? { members: h.members.filter((m) => m !== email) } : {}));
+      updateHousehold((h) => {
+        if (h.status !== 'ready') return {};
+        const { [email]: _gone, ...roles } = h.roles;
+        return { members: h.members.filter((m) => m !== email), roles };
+      });
+    },
+    async setRole(email, role) {
+      updateHousehold((h) => (h.status === 'ready' ? { roles: { ...h.roles, [email]: role } } : {}));
     },
     async sendInviteEmail() {},
     async saveLayout(layout) {
