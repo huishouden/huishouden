@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/huishouden/portal/compare/v1.5.1...v1.6.0) (2026-10-02)
+
+
+### Features
+
+* households order and hide their app tiles; everyday apps first by default ([#25](https://github.com/huishouden/portal/issues/25)) ([ceaf0c3](https://github.com/huishouden/portal/commit/ceaf0c322ad4a94886e551a20ba1316ee2c61621))
+
 ## [1.5.1](https://github.com/huishouden/portal/compare/v1.5.0...v1.5.1) (2026-10-02)
 
 
