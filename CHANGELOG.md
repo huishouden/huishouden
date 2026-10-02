@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/huishouden/portal/compare/v2.3.0...v2.3.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* Today drops a missed put-the-bins-out task (pwa-kit 0.41.0) ([#41](https://github.com/huishouden/portal/issues/41)) ([06f80d3](https://github.com/huishouden/portal/commit/06f80d36cc29c4960457d5efcb73deb5f3c96677))
+
 ## [2.3.0](https://github.com/huishouden/portal/compare/v2.2.1...v2.3.0) (2026-10-02)
 
 
