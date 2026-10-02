@@ -8,10 +8,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
-    "icons": "bun scripts/icons.ts",
-    "e2e": "playwright test"
+    "icons": "pwa-icons",
+    "e2e": "playwright test",
+    "prepare": "git config core.hooksPath .githooks",
+    "bootstrap": "node_modules/@piekstra/pwa-kit/infra/bootstrap.sh infra/apps.conf"
   },
   "devDependencies": {
+    "@piekstra/pwa-kit": "github:piekstra/pwa-kit#v0.1.0",
     "@playwright/test": "^1.63.0",
     "@types/bun": "^1.4.2",
     "sharp": "^0.35.5",

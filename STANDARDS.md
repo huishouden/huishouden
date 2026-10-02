@@ -1,5 +1,20 @@
 # Household PWA standard
 
+The general rules live in [pwa-kit's STANDARD.md](https://github.com/piekstra/pwa-kit/blob/main/STANDARD.md)
+and every household app follows them. This file adds what is specific to the household.
+
+## Household specifics
+
+- Firebase project: `huishouden-piekstra` (free plan, no billing account). Sites:
+  `huishouden-piekstra` (this portal), `huishouden-spending`, `huishouden-tasks`.
+- Wiring: `bun run bootstrap` here runs pwa-kit's bootstrap with `infra/apps.conf`.
+- Register each app in this portal's `src/apps.ts`; set `live: true` once it is deployed.
+- Firestore rules: the project's single rules file is deployed from `household-tasks`. Other apps'
+  blocks go there (spending's is `households/{householdId}/spendingTransactions`).
+- `authDomain`: `huishouden-piekstra.firebaseapp.com`.
+
+---
+
 Every app in the household (portal, spending, tasks, and whatever comes next) follows this.
 Each rule is here because skipping it broke something; the reason is given so the rule can be
 judged rather than copied.

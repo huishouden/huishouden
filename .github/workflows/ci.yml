@@ -14,65 +14,11 @@ permissions:
   contents: read
 
 jobs:
-  leak-scan:
-    uses: ./.github/workflows/leak-scan.yml
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ hashFiles('bun.lock') }}
-      - run: bun install --frozen-lockfile
-      - run: bun run lint
-      - run: bun run build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist
-          retention-days: 1
-
-  deploy:
-    needs: [build, leak-scan]
-    # Skipped until the Google Cloud deploy identity is configured as repo variables.
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.GCP_WIF_PROVIDER != ''
-    runs-on: ubuntu-latest
-    environment: production
+  pwa:
+    uses: piekstra/pwa-kit/.github/workflows/pwa.yml@v0
     permissions:
       contents: read
-      id-token: write # keyless auth to Google Cloud via Workload Identity Federation
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
-      - uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOY_SA }}
-      - run: npx --yes firebase-tools@14 deploy --only hosting:portal --non-interactive
-
-  smoke:
-    # Real-browser checks against the live site, right after it changes.
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-${{ hashFiles('bun.lock') }}
-      - run: bun install --frozen-lockfile
-      - run: bunx playwright install --with-deps chromium
-      - run: bun run e2e
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-traces
-          path: test-results
-          retention-days: 7
+      id-token: write
+    with:
+      hosting-target: portal
+      site-url: https://huishouden-piekstra.web.app
