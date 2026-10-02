@@ -30,5 +30,32 @@
     "site": "huishouden-baby",
     "webApp": "Baby",
     "glyph": "bottle"
+  },
+  {
+    "name": "Pet",
+    "description": "Vet visits, medicines, reminders and records",
+    "repo": "pet",
+    "site": "huishouden-pet",
+    "webApp": "Pet",
+    "glyph": "paw",
+    "tile": false
+  },
+  {
+    "name": "Home",
+    "description": "Upkeep schedule, service history and warranties",
+    "repo": "home",
+    "site": "huishouden-home",
+    "webApp": "Home",
+    "glyph": "wrench",
+    "tile": false
+  },
+  {
+    "name": "Car",
+    "description": "Service, renewals and records for the cars",
+    "repo": "car",
+    "site": "huishouden-car",
+    "webApp": "Car",
+    "glyph": "car",
+    "tile": false
   }
 ]
