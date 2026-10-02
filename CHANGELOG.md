@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/huishouden/portal/compare/v2.1.0...v2.2.0) (2026-10-02)
+
+
+### Features
+
+* Today shows what's done, kind icons, spice chips, no signed-out flash on reload ([#34](https://github.com/huishouden/portal/issues/34)) ([e6592da](https://github.com/huishouden/portal/commit/e6592da40d7022c8c74ce33403694c8a42dbc3d3))
+
 ## [2.1.0](https://github.com/huishouden/portal/compare/v2.0.0...v2.1.0) (2026-10-02)
 
 
