@@ -1,11 +1,15 @@
 import { expect, test } from '@playwright/test';
 import { expectCleanLoad, expectGoogleSignInPopup, expectInstallable } from '@huishouden/pwa-kit/e2e';
+import { readFileSync } from 'node:fs';
 
-test('loads without runtime errors and links every live app', async ({ page }) => {
+const registry: { site: string; tile?: boolean }[] = JSON.parse(readFileSync(new URL('../apps.json', import.meta.url), 'utf8'));
+
+test('loads without runtime errors and has a working tile for every app in apps.json', async ({ page }) => {
   await expectCleanLoad(page);
   await expect(page.getByRole('heading', { name: 'Huishouden' })).toBeVisible();
   const links = await page.locator('a.tile').evaluateAll((as) => as.map((a) => (a as HTMLAnchorElement).href));
-  expect(links.length).toBeGreaterThan(0);
+  const expected = registry.filter((app) => app.tile !== false).map((app) => `https://${app.site}.web.app/`);
+  expect(links).toEqual(expected);
   for (const href of links) expect((await page.request.get(href)).ok(), href).toBe(true);
 });
 
