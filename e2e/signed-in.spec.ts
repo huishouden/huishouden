@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { signInTestUser } from '@huishouden/pwa-kit/e2e';
+import { expectBottomNav, signInTestUser } from '@huishouden/pwa-kit/e2e';
 import { seedTestHousehold } from '@huishouden/pwa-kit/staging';
 
 // Signed in as invented test users on the staging site (pwa-kit STANDARD.md "Staging"): the real
@@ -60,4 +60,10 @@ test('signed in on the portal, each moved app opens signed in', async ({ page })
     await page.goto(app.path!.slice(1));
     await expect(signedIn, app.repo).toBeVisible({ timeout: 20_000 });
   }
+});
+
+test('signed in on a phone, the sections are a bottom bar', async ({ page }) => {
+  await signInTestUser(page, { email: 'test-a@example.com' });
+  await expect(page.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: 'Today' })).toBeVisible({ timeout: 20_000 });
+  await expectBottomNav(page, { labels: ['Today', 'Calendar', 'Contacts', 'Apps'] });
 });
