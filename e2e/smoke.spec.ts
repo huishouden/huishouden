@@ -2,13 +2,15 @@ import { expect, test } from '@playwright/test';
 import { expectCleanLoad, expectGoogleSignInPopup, expectHuishoudenFrame, expectInstallable, expectSecurityHeaders } from '@huishouden/pwa-kit/e2e';
 import { readFileSync } from 'node:fs';
 import { MEMBER_HINT } from '../src/memberHint';
-import { appHref, suiteLink, type RegistryEntry } from '../src/apps';
 import { markedDone, member, restoring, showHub } from './fixtures/hub';
 
+type RegistryEntry = { repo: string; site: string; path?: string; redirect?: boolean; tile?: boolean };
 const registry: RegistryEntry[] = JSON.parse(readFileSync(new URL('../apps.json', import.meta.url), 'utf8'));
 const tileApps = registry.filter((app) => app.tile !== false);
 // Tiles open a moved app at its path on this site (resolved against the page), others at their own site.
 const BASE = process.env.BASE_URL ?? 'https://huishouden-piekstra.web.app/';
+// (Same rule as appHref in src/apps.ts, which Playwright can't import: it imports apps.json.)
+const appHref = (app: RegistryEntry) => (app.path && app.redirect ? app.path : `https://${app.site}.web.app/`);
 const urlOf = (app: RegistryEntry) => new URL(appHref(app), BASE).href;
 
 test('loads without runtime errors and has a working tile for every app in apps.json, in its order', async ({ page }) => {
@@ -88,7 +90,8 @@ test('members land on Today: overdue first, each item linking to its app', async
   await expect(sections.first()).toHaveAttribute('aria-label', 'Overdue');
   const gutters = page.getByRole('link', { name: /Gutter cleaning/ });
   await expect(gutters).toContainText('Overdue by 4 days');
-  await expect(gutters).toHaveAttribute('href', suiteLink('https://huishouden-home.web.app/'));
+  const home = registry.find((a) => a.repo === 'home')!;
+  await expect(gutters).toHaveAttribute('href', home.redirect ? home.path! : 'https://huishouden-home.web.app/');
   await expect(page.getByRole('region', { name: 'By app' })).toContainText('Home');
   // The kind is the icon, the app its badge; both read out. A title naming who leaves `who` out.
   await expect(gutters).toContainText('Due. Open in Home');
