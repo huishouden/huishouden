@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectCleanLoad, expectGoogleSignInPopup, expectHuishoudenFrame, expectInstallable, expectSecurityHeaders } from '@huishouden/pwa-kit/e2e';
+import { expectBottomNav, expectCleanLoad, expectGoogleSignInPopup, expectHuishoudenFrame, expectInstallable, expectSecurityHeaders } from '@huishouden/pwa-kit/e2e';
 import { readFileSync } from 'node:fs';
 import { MEMBER_HINT } from '../src/memberHint';
 import { markedDone, member, restoring, showHub } from './fixtures/hub';
@@ -154,6 +154,13 @@ test('members get the tabs, and Contacts lists every household contact', async (
   await page.getByRole('button', { name: 'Pet', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Example Animal Hospital' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Example Plumbing' })).toHaveCount(0);
+});
+
+test('on a phone, members get the sections as a bottom bar', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await showHub(page, member());
+  await expectBottomNav(page, { labels: ['Today', 'Calendar', 'Contacts', 'Apps'] });
 });
 
 test("members keep the household's food preferences, with every member listed", async ({ page }) => {
