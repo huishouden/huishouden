@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { setDoc, updateDoc } from '@huishouden/pwa-kit/firestore';
-import { forgetSilentSignIn, signInSilently } from '@huishouden/pwa-kit/auth';
+import { signInSilently } from '@huishouden/pwa-kit/auth';
 import {
   createHousehold,
   inviteMember,
@@ -24,7 +24,7 @@ import { saveFood, watchFood, type FoodPreferences } from '@huishouden/pwa-kit/f
 import { googleAccessMessage, readError } from '@huishouden/pwa-kit/feedback';
 import { track } from '@huishouden/pwa-kit/observability';
 import { DEFAULT_LAYOUT, parseLayout, type PortalLayout } from '../apps';
-import { auth, db, googleClientId } from '../firebase';
+import { auth, db, googleClientId, signInWithGoogle, signOutEverywhere } from '../firebase';
 import { rememberHousehold, rememberedHousehold } from '../memberHint';
 import { MAX_NAME, suggestedHouseholdName, type HouseholdView, type HubActions, type HubState } from '../hub';
 
@@ -216,17 +216,14 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
     return {
       async signIn() {
         try {
-          await signInWithPopup(auth, new GoogleAuthProvider());
+          await signInWithGoogle();
         } catch (e) {
           const code = (e as { code?: string }).code;
           if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
           throw new Error("Couldn't sign in. Try again.");
         }
       },
-      async signOut() {
-        await forgetSilentSignIn();
-        await signOut(auth);
-      },
+      signOut: signOutEverywhere,
       async createHousehold(name) {
         if (!email) return;
         await createHousehold(db, email, name.slice(0, MAX_NAME)).catch((e) => {
