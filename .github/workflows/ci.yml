@@ -9,6 +9,10 @@ on:
     # failure with no jobs; skipping them here means no run is created. The merge to main still runs
     # everything. See pwa-kit templates/ci.yml.
     paths-ignore: [CHANGELOG.md, package.json]
+  # Every app's build lives on this one site (pwa-kit docs/one-site.md). Apps deploy the whole site
+  # when they change; this run redeploys it if one published a build the live site lacks.
+  schedule:
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       staging-ref:
@@ -17,8 +21,9 @@ on:
         default: ''
 
 concurrency:
-  # A manual staging deploy from main must not cancel main's production deploy.
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.staging-ref }}
+  # A manual staging deploy from main must not cancel main's production deploy, nor a scheduled
+  # reconcile a push's deploy.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.staging-ref }}-${{ github.event_name == 'schedule' }}
   cancel-in-progress: true
 
 permissions:
@@ -28,13 +33,14 @@ jobs:
   pwa:
     uses: huishouden/pwa-kit/.github/workflows/pwa.yml@v0
     permissions:
-      contents: write # README screenshots, PR evidence branch
+      contents: write # README screenshots, PR evidence branch, the hosting release asset
       id-token: write
       pull-requests: write # before/after comment on PRs
     with:
-      hosting-target: portal
-      site-url: https://huishouden-piekstra.web.app
+      base: /
+      site-url: https://huishouden-piekstra.web.app/
       staging-ref: ${{ inputs.staging-ref }}
+      reconcile: ${{ github.event_name == 'schedule' }}
 
   release:
     uses: huishouden/pwa-kit/.github/workflows/release.yml@v0
