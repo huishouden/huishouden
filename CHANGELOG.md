@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/huishouden/portal/compare/v2.5.0...v2.6.0) (2026-10-03)
+
+
+### Features
+
+* serve the suite from one site; the portal assembles and reconciles it (pwa-kit 0.47.0) ([#46](https://github.com/huishouden/portal/issues/46)) ([a86d5ef](https://github.com/huishouden/portal/commit/a86d5ef9071505fcb9d39aab1df06080dce31c17))
+
 ## [2.5.0](https://github.com/huishouden/portal/compare/v2.4.0...v2.5.0) (2026-10-03)
 
 
