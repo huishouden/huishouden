@@ -37,7 +37,8 @@
       "Handyman",
       "Insurance",
       "HOA"
-    ]
+    ],
+    "redirect": true
   },
   {
     "name": "Pet",
@@ -54,7 +55,8 @@
       "Boarding",
       "Pet sitter",
       "Trainer"
-    ]
+    ],
+    "redirect": true
   },
   {
     "name": "Car",
@@ -91,7 +93,8 @@
     "site": "huishouden-spending",
     "path": "/spending/",
     "webApp": "Spending",
-    "glyph": "card"
+    "glyph": "card",
+    "redirect": true
   },
   {
     "name": "Baby",
@@ -107,6 +110,7 @@
       "Hospital",
       "Lactation consultant",
       "Doula"
-    ]
+    ],
+    "redirect": true
   }
 ]
