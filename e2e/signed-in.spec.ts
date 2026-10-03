@@ -65,5 +65,19 @@ test('signed in on the portal, each moved app opens signed in', async ({ page })
 test('signed in on a phone, the sections are a bottom bar', async ({ page }) => {
   await signInTestUser(page, { email: 'test-a@example.com' });
   await expect(page.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name: 'Today' })).toBeVisible({ timeout: 20_000 });
-  await expectBottomNav(page, { labels: ['Today', 'Calendar', 'Contacts', 'Apps'] });
+  await expectBottomNav(page, { labels: ['Today', 'To-do', 'Calendar', 'Apps', 'More'], more: ['Contacts'] });
 });
+
+// The rules let the admin read every to-do and the helper the open ones (their query asks for
+// them): either way the tab loads its list, never stuck loading. Each app's own staging test runs a
+// real item's Done from here (runPortalTodo in @huishouden/pwa-kit/e2e).
+for (const email of ['test-a@example.com', 'test-helper@example.com']) {
+  test(`${email.split('@')[0]} opens the household's to-do list`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (m) => m.type() === 'error' && /permission/i.test(m.text()) && errors.push(m.text()));
+    await signInTestUser(page, { email, path: '/todo' });
+    await expect(page.getByRole('heading', { name: 'To-do' })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/things? to do|Nothing to do in any app/).first()).toBeVisible({ timeout: 20_000 });
+    expect(errors).toEqual([]);
+  });
+}

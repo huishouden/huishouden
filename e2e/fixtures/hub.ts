@@ -3,6 +3,9 @@ import type { AgendaItem } from '@huishouden/pwa-kit/agenda';
 import type { Contact } from '@huishouden/pwa-kit/contacts';
 import type { FoodPreferences } from '@huishouden/pwa-kit/food';
 import type { HubState, ReadyHousehold } from '../../src/hub';
+import { helperTodos, todos } from '../../src/__fixtures__/todos';
+
+export { todos };
 
 // Invented people and places for previews of signed-in screens. E2E can't sign in to Google, so these
 // are handed to the app with `window.__hubPreview(state)` (src/data/preview.ts); nothing reaches Firestore.
@@ -83,6 +86,7 @@ export const member = (extra: Partial<Extract<HubState, { auth: 'signed-in' }>> 
   contacts,
   agenda,
   food,
+  todos,
   ...extra,
 });
 
@@ -106,4 +110,5 @@ export const helper = (): HubState => ({
   contacts: contacts.filter((c) => !c.private),
   agenda: agenda.filter((i) => i.app !== 'bills' && i.app !== 'spending'),
   food,
+  todos: helperTodos(),
 });

@@ -1,4 +1,4 @@
-import { CalendarDays, Contact as ContactIcon, LayoutGrid, Sun } from 'lucide-react';
+import { CalendarDays, Contact as ContactIcon, LayoutGrid, ListChecks, Sun } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { AppBar } from '@huishouden/pwa-kit/react/app-bar';
 import { SectionTabs, Toast, useToast, type Tab } from '@huishouden/pwa-kit/react/ui';
@@ -13,6 +13,7 @@ import { CalendarScreen } from './screens/CalendarScreen';
 import { ContactsScreen } from './screens/ContactsScreen';
 import { clearSharedContact, readSharedContact, type ParsedContact } from '@huishouden/pwa-kit/contacts';
 import { TodayScreen } from './screens/TodayScreen';
+import { TodoScreen } from './screens/TodoScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { PRIVACY_PATH } from '@huishouden/pwa-kit/app-bar';
 import { trackView } from '@huishouden/pwa-kit/observability';
@@ -20,20 +21,23 @@ import { useNow } from './now';
 
 const VERSION = `${import.meta.env.VITE_APP_VERSION} (${import.meta.env.VITE_BUILD_SHA})`;
 
-type TabId = 'today' | 'calendar' | 'contacts' | 'apps';
-const TAB_IDS: TabId[] = ['today', 'calendar', 'contacts', 'apps'];
+type TabId = 'today' | 'todo' | 'calendar' | 'contacts' | 'apps';
+const TAB_IDS: TabId[] = ['today', 'todo', 'calendar', 'contacts', 'apps'];
 
 /**
  * Members get the tabs; everyone else sees Apps (signed out, with what Huishouden is). A device that
  * remembers a member gets them while sign-in restores, so a reload doesn't flash the introduction.
+ * On phones the bottom bar holds four, led by what needs doing (Today, To-do), then Calendar and
+ * Apps; Contacts is under More.
  */
 function tabsFor(state: HubState): Tab[] {
   if (!isMember(state) && !restoringMember(state)) return [];
   return [
-    { id: 'today', label: 'Today', icon: Sun },
-    { id: 'calendar', label: 'Calendar', icon: CalendarDays },
+    { id: 'today', label: 'Today', icon: Sun, primary: true },
+    { id: 'todo', label: 'To-do', icon: ListChecks, primary: true },
+    { id: 'calendar', label: 'Calendar', icon: CalendarDays, primary: true },
     { id: 'contacts', label: 'Contacts', icon: ContactIcon },
-    { id: 'apps', label: 'Apps', icon: LayoutGrid },
+    { id: 'apps', label: 'Apps', icon: LayoutGrid, primary: true },
   ];
 }
 
@@ -157,6 +161,9 @@ export default function App() {
             me={signedIn?.me}
             profiles={signedIn?.household.status === 'ready' ? signedIn.household.profiles : undefined}
           />
+        )}
+        {tab === 'todo' && (
+          <TodoScreen todos={signedIn?.todos} apps={ordered} now={now} me={signedIn?.me} role={role} actions={actions} notify={notify} fail={fail} />
         )}
         {tab === 'calendar' && <CalendarScreen agenda={signedIn?.agenda} apps={ordered} now={now} />}
         {tab === 'contacts' && (

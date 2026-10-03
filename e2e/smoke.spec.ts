@@ -84,7 +84,7 @@ test('members land on Today: overdue first, each item linking to its app', async
   await page.goto('/', { waitUntil: 'networkidle' });
   await showHub(page, member());
   const tabs = page.getByRole('navigation', { name: 'Sections' });
-  await expect(tabs.getByRole('button')).toHaveText(['Today', 'Calendar', 'Contacts', 'Apps']);
+  await expect(tabs.getByRole('button')).toHaveText(['Today', 'To-do', 'Calendar', 'Contacts', 'Apps']);
   await expect(tabs.getByRole('button', { name: 'Today' })).toHaveAttribute('aria-current', 'page');
   const sections = page.locator('main section[aria-label]');
   await expect(sections.first()).toHaveAttribute('aria-label', 'Overdue');
@@ -160,7 +160,8 @@ test('on a phone, members get the sections as a bottom bar', async ({ page }) =>
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/', { waitUntil: 'networkidle' });
   await showHub(page, member());
-  await expectBottomNav(page, { labels: ['Today', 'Calendar', 'Contacts', 'Apps'] });
+  // Led by what needs doing; Contacts, used least, is under More.
+  await expectBottomNav(page, { labels: ['Today', 'To-do', 'Calendar', 'Apps', 'More'], more: ['Contacts'] });
 });
 
 test("members keep the household's food preferences, with every member listed", async ({ page }) => {
