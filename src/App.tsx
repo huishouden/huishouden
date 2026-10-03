@@ -1,3 +1,4 @@
+import { CalendarDays, Contact as ContactIcon, LayoutGrid, Sun } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { AppBar } from '@huishouden/pwa-kit/react/app-bar';
 import { SectionTabs, Toast, useToast, type Tab } from '@huishouden/pwa-kit/react/ui';
@@ -29,10 +30,10 @@ const TAB_IDS: TabId[] = ['today', 'calendar', 'contacts', 'apps'];
 function tabsFor(state: HubState): Tab[] {
   if (!isMember(state) && !restoringMember(state)) return [];
   return [
-    { id: 'today', label: 'Today' },
-    { id: 'calendar', label: 'Calendar' },
-    { id: 'contacts', label: 'Contacts' },
-    { id: 'apps', label: 'Apps' },
+    { id: 'today', label: 'Today', icon: Sun },
+    { id: 'calendar', label: 'Calendar', icon: CalendarDays },
+    { id: 'contacts', label: 'Contacts', icon: ContactIcon },
+    { id: 'apps', label: 'Apps', icon: LayoutGrid },
   ];
 }
 
