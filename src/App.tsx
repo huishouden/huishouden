@@ -10,6 +10,7 @@ import { restoringMember } from './memberHint';
 import { AppsScreen } from './screens/AppsScreen';
 import { CalendarScreen } from './screens/CalendarScreen';
 import { ContactsScreen } from './screens/ContactsScreen';
+import { clearSharedContact, readSharedContact, type ParsedContact } from '@huishouden/pwa-kit/contacts';
 import { TodayScreen } from './screens/TodayScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { PRIVACY_PATH } from '@huishouden/pwa-kit/app-bar';
@@ -51,6 +52,9 @@ export default function App() {
   const [signInError, setSignInError] = useState<string>();
   const [chosen, setChosen] = useState<TabId | undefined>(tabFromPath);
   const [privacy, setPrivacy] = useState(onPrivacyPage);
+  // A contact card from the Share menu (Contacts → Share → Huishouden): kept until a member's
+  // Contacts tab can open it as a new contact, filled in.
+  const [sharedCards, setSharedCards] = useState<ParsedContact[] | null>(null);
   const now = useNow();
   const hour = new Date(now).getHours();
 
@@ -65,6 +69,15 @@ export default function App() {
     setLastStatus(householdStatus);
     if (lastStatus === 'none' && householdStatus === 'ready' && !chosen) setChosen('apps');
   }
+
+  useEffect(() => {
+    void readSharedContact().then((cards) => {
+      if (!cards) return;
+      clearSharedContact();
+      setSharedCards(cards);
+      setChosen('contacts');
+    });
+  }, []);
 
   useEffect(() => {
     const onPop = () => {
@@ -146,7 +159,17 @@ export default function App() {
         )}
         {tab === 'calendar' && <CalendarScreen agenda={signedIn?.agenda} apps={ordered} now={now} />}
         {tab === 'contacts' && (
-          <ContactsScreen contacts={signedIn?.contacts} apps={ordered} actions={actions} notify={notify} fail={fail} me={signedIn?.me} role={role} />
+          <ContactsScreen
+            contacts={signedIn?.contacts}
+            apps={ordered}
+            actions={actions}
+            notify={notify}
+            fail={fail}
+            me={signedIn?.me}
+            role={role}
+            shared={sharedCards}
+            onSharedOpened={() => setSharedCards(null)}
+          />
         )}
       </main>
       <footer className="mx-auto w-full max-w-[1200px] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-sm text-stone-600 sm:px-6">
