@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.8.0](https://github.com/huishouden/portal/compare/v2.7.1...v2.8.0) (2026-10-03)
+
+
+### Features
+
+* Huishouden Groceries tile; Tasks is to-dos and chores ([#56](https://github.com/huishouden/portal/issues/56)) ([e678675](https://github.com/huishouden/portal/commit/e678675d418011d6469bb80861e99b8fc556d2de))
+* sections in a bottom bar on phones (kit 0.52.0) ([#58](https://github.com/huishouden/portal/issues/58)) ([a906b9a](https://github.com/huishouden/portal/commit/a906b9aa2de56deebd432e82f2011160c19d895d))
+
 ## [2.7.1](https://github.com/huishouden/portal/compare/v2.7.0...v2.7.1) (2026-10-03)
 
 
