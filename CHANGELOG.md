@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/huishouden/portal/compare/v2.8.0...v2.9.0) (2026-10-03)
+
+
+### Features
+
+* To-do tab, every app's open things in one list (kit 0.53.0) ([#60](https://github.com/huishouden/portal/issues/60)) ([53fb450](https://github.com/huishouden/portal/commit/53fb45008e0aea3da7f3269f418e187471cdf4f3))
+
 ## [2.8.0](https://github.com/huishouden/portal/compare/v2.7.1...v2.8.0) (2026-10-03)
 
 
