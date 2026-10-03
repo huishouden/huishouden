@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/huishouden/portal/compare/v2.4.0...v2.5.0) (2026-10-03)
+
+
+### Features
+
+* **contacts:** add a contact from your own contacts; contact cards in the Share menu ([#47](https://github.com/huishouden/portal/issues/47)) ([56bc75c](https://github.com/huishouden/portal/commit/56bc75c2cfec18d1aa71e70b55dd56f8e55c5e11))
+
 ## [2.4.0](https://github.com/huishouden/portal/compare/v2.3.1...v2.4.0) (2026-10-02)
 
 
