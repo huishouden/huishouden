@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { LayoutGrid, UserPlus } from 'lucide-react';
-import { groupContacts, type Contact } from '@huishouden/pwa-kit/contacts';
+import { groupContacts, type Contact, type ParsedContact } from '@huishouden/pwa-kit/contacts';
 import { ContactCard, ContactDialog } from '@huishouden/pwa-kit/react/contacts';
 import { can, type Role } from '@huishouden/pwa-kit/roles';
 import { Checkbox, Chip, Dialog, cardClass, ghostButton, primaryButton } from '@huishouden/pwa-kit/react/ui';
+import { auth } from '../firebase';
 import type { HouseholdApp } from '../apps';
 import type { HubActions } from '../hub';
 
@@ -17,6 +18,9 @@ interface Props {
   actions: HubActions;
   notify: (message: string, undo?: () => void) => void;
   fail: (message: string) => void;
+  /** Contact cards shared into the app: opened once as a new contact, filled in. */
+  shared?: ParsedContact[] | null;
+  onSharedOpened?: () => void;
 }
 
 type Filter = { kind: 'all' } | { kind: 'app'; repo: string } | { kind: 'none' };
@@ -27,7 +31,7 @@ const unique = (list: string[]) => [...new Map(list.map((r) => [r.toLowerCase(),
  * Every contact the household keeps, whichever apps show it: grouped by role, tagged with its apps,
  * and added or edited with the same dialog the apps use. New contacts show in no app until chosen.
  */
-export function ContactsScreen({ contacts, apps, actions, notify, fail, me, role = 'member' }: Props) {
+export function ContactsScreen({ contacts, apps, actions, notify, fail, me, role = 'member', shared, onSharedOpened }: Props) {
   const mayChange = (c: Contact) => can(role, 'edit-others') || (!!me && c.by === me);
   const contactApps = useMemo(() => apps.filter((a) => a.contactRoles.length > 0), [apps]);
   const nameOf = useMemo(() => new Map(apps.map((a) => [a.repo, a.name])), [apps]);
@@ -37,6 +41,14 @@ export function ContactsScreen({ contacts, apps, actions, notify, fail, me, role
   const [filter, setFilter] = useState<Filter>({ kind: 'all' });
   const [editing, setEditing] = useState<Contact | 'new' | null>(null);
   const [choosing, setChoosing] = useState<Contact | null>(null);
+  const [sharedCards, setSharedCards] = useState<ParsedContact[] | undefined>();
+
+  useEffect(() => {
+    if (!shared) return;
+    setSharedCards(shared);
+    setEditing('new');
+    onSharedOpened?.();
+  }, [shared, onSharedOpened]);
 
   const run = (task: Promise<void>) => task.catch((e) => fail(e instanceof Error ? e.message : String(e)));
 
@@ -134,6 +146,8 @@ export function ContactsScreen({ contacts, apps, actions, notify, fail, me, role
           app=""
           roles={rolesFor(editing)}
           namePlaceholder="Example Plumbing"
+          auth={auth}
+          sharedContacts={editing === 'new' ? sharedCards : undefined}
           canMarkPrivate={can(role, 'see-private')}
           onSave={(input) => {
             if (editing === 'new') {
@@ -150,7 +164,10 @@ export function ContactsScreen({ contacts, apps, actions, notify, fail, me, role
                   notify(`Deleted ${editing.name}`, () => void run(actions.restoreContact(editing)));
                 }
           }
-          onClose={() => setEditing(null)}
+          onClose={() => {
+            setEditing(null);
+            setSharedCards(undefined);
+          }}
         />
       )}
       {choosing && (

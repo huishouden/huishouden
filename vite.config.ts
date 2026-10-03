@@ -11,6 +11,8 @@ export default defineConfig({
       name: 'Huishouden',
       description: "Your household's apps, together in one place",
       url: 'https://huishouden-piekstra.web.app',
+      // Contacts → Share → Huishouden on Android: a contact card becomes a household contact.
+      shareTarget: { contacts: true },
       themeColor: '#1b4332',
       backgroundColor: '#faf9f5',
     }),
