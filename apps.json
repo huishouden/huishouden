@@ -3,6 +3,7 @@
     "name": "Huishouden",
     "repo": "portal",
     "site": "huishouden-piekstra",
+    "path": "/",
     "webApp": "Portal",
     "glyph": "home",
     "tile": false
@@ -12,6 +13,7 @@
     "description": "Shared lists and chores",
     "repo": "tasks",
     "site": "huishouden-tasks",
+    "path": "/tasks/",
     "webApp": "Tasks",
     "glyph": "check"
   },
@@ -20,6 +22,7 @@
     "description": "Keeping the house in good shape",
     "repo": "home",
     "site": "huishouden-home",
+    "path": "/home/",
     "webApp": "Home",
     "glyph": "wrench",
     "contactRoles": [
@@ -40,6 +43,7 @@
     "description": "Looking after the pets, together",
     "repo": "pet",
     "site": "huishouden-pet",
+    "path": "/pet/",
     "webApp": "Pet",
     "glyph": "paw",
     "contactRoles": [
@@ -56,6 +60,7 @@
     "description": "Keeping the cars on the road",
     "repo": "car",
     "site": "huishouden-car",
+    "path": "/car/",
     "webApp": "Car",
     "glyph": "car",
     "contactRoles": [
@@ -72,6 +77,7 @@
     "description": "What's due, and when",
     "repo": "bills",
     "site": "huishouden-bills",
+    "path": "/bills/",
     "webApp": "Bills",
     "glyph": "card"
   },
@@ -80,6 +86,7 @@
     "description": "Where the household's money goes",
     "repo": "spending",
     "site": "huishouden-spending",
+    "path": "/spending/",
     "webApp": "Spending",
     "glyph": "card"
   },
@@ -88,6 +95,7 @@
     "description": "Looking after the little one, together",
     "repo": "baby",
     "site": "huishouden-baby",
+    "path": "/baby/",
     "webApp": "Baby",
     "glyph": "bottle",
     "contactRoles": [

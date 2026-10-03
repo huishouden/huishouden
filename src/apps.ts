@@ -6,7 +6,12 @@ export interface RegistryEntry {
   name: string;
   description?: string;
   repo: string;
+  /** The app's own Hosting site: its old address, and its staging site's name. */
   site: string;
+  /** Its path on the shared site (pwa-kit docs/one-site.md): `/` for the portal, `/<repo>/` for an app. */
+  path?: string;
+  /** Its old address redirects to the path, so tiles link to the path. */
+  redirect?: boolean;
   webApp?: string;
   glyph: Glyph;
   /** False for the portal itself. */
