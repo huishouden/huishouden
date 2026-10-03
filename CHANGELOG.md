@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.7.0](https://github.com/huishouden/portal/compare/v2.6.0...v2.7.0) (2026-10-03)
+
+
+### Features
+
+* tiles open moved apps at their path; their old addresses redirect (pwa-kit 0.49.0) ([#52](https://github.com/huishouden/portal/issues/52)) ([895c16e](https://github.com/huishouden/portal/commit/895c16eab13d6c8e176a533c3831a1c764e1abb8))
+
+
+### Bug Fixes
+
+* pwa-kit 0.48.0 (the site's /&lt;app&gt; redirect no longer loops) ([#50](https://github.com/huishouden/portal/issues/50)) ([4219be0](https://github.com/huishouden/portal/commit/4219be0a99206090c22afd513542021ea8dfec99))
+
 ## [2.6.0](https://github.com/huishouden/portal/compare/v2.5.0...v2.6.0) (2026-10-03)
 
 
