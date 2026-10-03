@@ -14,6 +14,7 @@
     "repo": "tasks",
     "site": "huishouden-tasks",
     "path": "/tasks/",
+    "redirect": true,
     "webApp": "Tasks",
     "glyph": "check"
   },
@@ -61,6 +62,7 @@
     "repo": "car",
     "site": "huishouden-car",
     "path": "/car/",
+    "redirect": true,
     "webApp": "Car",
     "glyph": "car",
     "contactRoles": [
@@ -78,6 +80,7 @@
     "repo": "bills",
     "site": "huishouden-bills",
     "path": "/bills/",
+    "redirect": true,
     "webApp": "Bills",
     "glyph": "card"
   },

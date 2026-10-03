@@ -4,9 +4,14 @@ import { readFileSync } from 'node:fs';
 import { MEMBER_HINT } from '../src/memberHint';
 import { markedDone, member, restoring, showHub } from './fixtures/hub';
 
-const registry: { repo: string; site: string; tile?: boolean }[] = JSON.parse(readFileSync(new URL('../apps.json', import.meta.url), 'utf8'));
+type RegistryEntry = { repo: string; site: string; path?: string; redirect?: boolean; tile?: boolean };
+const registry: RegistryEntry[] = JSON.parse(readFileSync(new URL('../apps.json', import.meta.url), 'utf8'));
 const tileApps = registry.filter((app) => app.tile !== false);
-const urlOf = (app: { site: string }) => `https://${app.site}.web.app/`;
+// Tiles open a moved app at its path on this site (resolved against the page), others at their own site.
+const BASE = process.env.BASE_URL ?? 'https://huishouden-piekstra.web.app/';
+// (Same rule as appHref in src/apps.ts, which Playwright can't import: it imports apps.json.)
+const appHref = (app: RegistryEntry) => (app.path && app.redirect ? app.path : `https://${app.site}.web.app/`);
+const urlOf = (app: RegistryEntry) => new URL(appHref(app), BASE).href;
 
 test('loads without runtime errors and has a working tile for every app in apps.json, in its order', async ({ page }) => {
   await expectCleanLoad(page);
@@ -85,7 +90,8 @@ test('members land on Today: overdue first, each item linking to its app', async
   await expect(sections.first()).toHaveAttribute('aria-label', 'Overdue');
   const gutters = page.getByRole('link', { name: /Gutter cleaning/ });
   await expect(gutters).toContainText('Overdue by 4 days');
-  await expect(gutters).toHaveAttribute('href', 'https://huishouden-home.web.app/');
+  const home = registry.find((a) => a.repo === 'home')!;
+  await expect(gutters).toHaveAttribute('href', home.redirect ? home.path! : 'https://huishouden-home.web.app/');
   await expect(page.getByRole('region', { name: 'By app' })).toContainText('Home');
   // The kind is the icon, the app its badge; both read out. A title naming who leaves `who` out.
   await expect(gutters).toContainText('Due. Open in Home');
@@ -133,7 +139,8 @@ test('the calendar lists items by day and filters by app', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'Tomorrow' })).toContainText('Six-month checkup');
   await page.getByRole('group', { name: 'Show items from' }).getByRole('button', { name: 'Car' }).click();
   await expect(page.getByRole('region', { name: 'Tomorrow' })).not.toContainText('Six-month checkup');
-  await expect(page.getByRole('link', { name: /Registration renewal/ })).toHaveAttribute('href', /^https:\/\/huishouden-car\.web\.app\//);
+  // Car has moved to the one site: its stored old address opens at /car/ on this origin.
+  await expect(page.getByRole('link', { name: /Registration renewal/ })).toHaveAttribute('href', '/car/');
 });
 
 test('members get the tabs, and Contacts lists every household contact', async ({ page }) => {

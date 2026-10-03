@@ -2,7 +2,7 @@ import { type AgendaItem, type TodayEntry, type TodayGroup } from '@huishouden/p
 import { longDate, toYmd } from '@huishouden/pwa-kit/time';
 import { cardClass, overline } from '@huishouden/pwa-kit/react/ui';
 import { ChevronDown, CircleCheck } from 'lucide-react';
-import type { HouseholdApp } from '../apps';
+import { suiteLink, type HouseholdApp } from '../apps';
 import { AppIcon } from '../components/AppIcon';
 import { Greeting } from '../components/DutchWord';
 import { ItemIcon, KIND_WORDS, itemMeta } from '../components/ItemIcon';
@@ -130,7 +130,7 @@ function TodayRow({ entry: { item, group, when }, app }: { entry: TodayEntry; ap
   const tone = group === 'overdue' ? 'text-terracotta-dark' : 'text-stone-700';
   return (
     <li>
-      <a href={item.url} className="flex min-h-20 items-center gap-3 px-4 py-3 hover:bg-forest-50 sm:gap-4 sm:px-5 sm:py-4">
+      <a href={suiteLink(item.url)} className="flex min-h-20 items-center gap-3 px-4 py-3 hover:bg-forest-50 sm:gap-4 sm:px-5 sm:py-4">
         <ItemIcon item={item} app={app} size={44} />
         <span className="min-w-0 flex-1">
           <span className="block text-xl font-semibold text-stone-800 [overflow-wrap:break-word] sm:text-2xl">{item.title}</span>
@@ -150,7 +150,7 @@ function DoneRow({ item, app, line }: { item: AgendaItem; app?: HouseholdApp; li
   const meta = [itemMeta(item), line].filter(Boolean).join(' · ');
   return (
     <li>
-      <a href={item.url} className="flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-forest-50 sm:gap-4 sm:px-5">
+      <a href={suiteLink(item.url)} className="flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-forest-50 sm:gap-4 sm:px-5">
         <CircleCheck size={28} className="shrink-0 text-forest-700" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="block text-lg font-medium text-stone-600 line-through decoration-stone-400 [overflow-wrap:break-word]">{item.title}</span>

@@ -34,6 +34,10 @@ export interface HouseholdApp {
   contactRoles: string[];
 }
 
+/** Where an app opens: its path on this site (pwa-kit docs/one-site.md), or its own site before it moved. */
+export const appHref = (app: Pick<RegistryEntry, 'site' | 'path' | 'redirect'>): string =>
+  app.path && app.redirect ? app.path : `https://${app.site}.web.app/`;
+
 export function tilesFrom(entries: RegistryEntry[]): HouseholdApp[] {
   return entries
     .filter((app) => app.tile !== false)
@@ -41,13 +45,32 @@ export function tilesFrom(entries: RegistryEntry[]): HouseholdApp[] {
       repo: app.repo,
       name: app.name,
       description: app.description ?? '',
-      url: `https://${app.site}.web.app/`,
+      url: appHref(app),
       icon: logoSvg(app.glyph),
       contactRoles: app.contactRoles ?? [],
     }));
 }
 
 export const APPS = tilesFrom(registry as RegistryEntry[]);
+
+/**
+ * A link an app stored (an agenda item's `url`) as this site's path when it points at an app's
+ * old address or at the shared site itself, so it opens inside the installed portal rather than
+ * through a redirect in a browser tab. Anything else is left as it is.
+ */
+export function suiteLink(url: string, entries: RegistryEntry[] = registry as RegistryEntry[]): string {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return url;
+  }
+  const rest = `${u.pathname.replace(/^\//, '')}${u.search}${u.hash}`;
+  const portal = entries.find((e) => e.path === '/');
+  if (portal && u.hostname === `${portal.site}.web.app`) return `/${rest}`;
+  const app = entries.find((e) => e.path && e.redirect && u.hostname === `${e.site}.web.app`);
+  return app ? `${app.path}${rest}` : url;
+}
 
 /**
  * A household's own tile layout (`households/{id}/settings/portal`): app repo names in the order
