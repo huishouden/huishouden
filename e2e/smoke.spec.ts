@@ -139,7 +139,8 @@ test('the calendar lists items by day and filters by app', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'Tomorrow' })).toContainText('Six-month checkup');
   await page.getByRole('group', { name: 'Show items from' }).getByRole('button', { name: 'Car' }).click();
   await expect(page.getByRole('region', { name: 'Tomorrow' })).not.toContainText('Six-month checkup');
-  await expect(page.getByRole('link', { name: /Registration renewal/ })).toHaveAttribute('href', /^https:\/\/huishouden-car\.web\.app\//);
+  // Car has moved to the one site: its stored old address opens at /car/ on this origin.
+  await expect(page.getByRole('link', { name: /Registration renewal/ })).toHaveAttribute('href', '/car/');
 });
 
 test('members get the tabs, and Contacts lists every household contact', async ({ page }) => {
