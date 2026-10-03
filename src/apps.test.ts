@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import registry from '../apps.json';
 import fixtures from './__fixtures__/portal-layouts.json';
-import { APPS, arrangeTiles, layoutOf, parseLayout, sameLayout, tilesFrom, type RegistryEntry } from './apps';
+import { APPS, appHref, arrangeTiles, layoutOf, parseLayout, sameLayout, suiteLink, tilesFrom, type RegistryEntry } from './apps';
 
 const repos = (apps: { repo: string }[]) => apps.map((a) => a.repo);
 
@@ -54,5 +54,27 @@ describe('a household layout', () => {
   it('compares hidden apps regardless of order', () => {
     expect(sameLayout({ order: ['a', 'b'], hidden: ['x', 'y'] }, { order: ['a', 'b'], hidden: ['y', 'x'] })).toBe(true);
     expect(sameLayout({ order: ['a', 'b'], hidden: [] }, { order: ['b', 'a'], hidden: [] })).toBe(false);
+  });
+});
+
+describe('one site (pwa-kit docs/one-site.md)', () => {
+  const entries: RegistryEntry[] = [
+    { name: 'Huishouden', repo: 'portal', site: 'example-family', path: '/', glyph: 'home', tile: false },
+    { name: 'Pet', repo: 'pet', site: 'example-pet', path: '/pet/', redirect: true, glyph: 'paw' },
+    { name: 'Baby', repo: 'baby', site: 'example-baby', path: '/baby/', glyph: 'bottle' },
+  ];
+
+  it('a moved app opens at its path; one not yet moved at its own site', () => {
+    expect(appHref(entries[1])).toBe('/pet/');
+    expect(appHref(entries[2])).toBe('https://example-baby.web.app/');
+  });
+
+  it("stored links to a moved app's old address or the shared site open on this site", () => {
+    expect(suiteLink('https://example-pet.web.app/?tab=care&pet=p1', entries)).toBe('/pet/?tab=care&pet=p1');
+    expect(suiteLink('https://example-pet.web.app/meds/c1#x', entries)).toBe('/pet/meds/c1#x');
+    expect(suiteLink('https://example-family.web.app/pet/?tab=care', entries)).toBe('/pet/?tab=care');
+    expect(suiteLink('https://example-baby.web.app/#appointments', entries)).toBe('https://example-baby.web.app/#appointments');
+    expect(suiteLink('https://example-pet.web.app.evil.example.com/', entries)).toBe('https://example-pet.web.app.evil.example.com/');
+    expect(suiteLink('not a url', entries)).toBe('not a url');
   });
 });

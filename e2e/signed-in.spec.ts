@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { signInTestUser } from '@huishouden/pwa-kit/e2e';
 import { seedTestHousehold } from '@huishouden/pwa-kit/staging';
 
@@ -43,4 +44,20 @@ test('a helper is told who manages people, sees no money, and can add a contact 
   await expect(page.getByRole('region', { name })).toBeVisible({ timeout: 20_000 });
   await page.getByRole('button', { name: `Delete ${name}` }).click();
   await expect(page.getByRole('region', { name })).toHaveCount(0);
+});
+
+// One site (pwa-kit docs/one-site.md): the apps share the portal's origin, so signing in here
+// signs every moved app in too.
+test('signed in on the portal, each moved app opens signed in', async ({ page }) => {
+  const registry: { repo: string; path?: string; redirect?: boolean }[] = JSON.parse(readFileSync(new URL('../apps.json', import.meta.url), 'utf8'));
+  const site = (await (await page.request.get('/hh-site.json')).json()) as { apps: Record<string, unknown> };
+  const moved = registry.filter((a) => a.path && a.redirect && site.apps[a.path]);
+  test.skip(moved.length === 0, 'no app on this site yet');
+  await signInTestUser(page, { email: 'test-a@example.com' });
+  const signedIn = page.locator('hh-app-bar').getByRole('button', { name: 'Signed in as test-a@example.com' });
+  await expect(signedIn).toBeVisible({ timeout: 20_000 });
+  for (const app of moved) {
+    await page.goto(app.path!.slice(1));
+    await expect(signedIn, app.repo).toBeVisible({ timeout: 20_000 });
+  }
 });

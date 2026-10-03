@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { agendaDays, agendaStatus, agendaTime, type AgendaItem } from '@huishouden/pwa-kit/agenda';
 import { dueText, toYmd } from '@huishouden/pwa-kit/time';
 import { Chip, cardClass, overline } from '@huishouden/pwa-kit/react/ui';
-import type { HouseholdApp } from '../apps';
+import { suiteLink, type HouseholdApp } from '../apps';
 import { ItemIcon, KIND_WORDS, itemMeta } from '../components/ItemIcon';
 
 interface Props {
@@ -79,7 +79,7 @@ function Row({ item, app, when, attention, done }: { item: AgendaItem; app?: Hou
   const meta = itemMeta(item);
   return (
     <li>
-      <a href={item.url} className="flex min-h-14 items-center gap-4 px-5 py-3 hover:bg-forest-50">
+      <a href={suiteLink(item.url)} className="flex min-h-14 items-center gap-4 px-5 py-3 hover:bg-forest-50">
         <span className={`w-20 shrink-0 text-sm tabular-nums sm:w-44 sm:text-base ${attention ? 'font-medium text-terracotta-dark' : 'text-stone-600'}`}>{when}</span>
         <ItemIcon item={item} app={app} size={28} />
         <span className="min-w-0 flex-1">
