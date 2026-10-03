@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.1](https://github.com/huishouden/portal/compare/v2.7.0...v2.7.1) (2026-10-03)
+
+
+### Bug Fixes
+
+* dialogs keep focus where it was tapped on phones (pwa-kit 0.51.0) ([#54](https://github.com/huishouden/portal/issues/54)) ([8fafd72](https://github.com/huishouden/portal/commit/8fafd72bc4bd09443bb4b7d7c8a72bca05866ce8))
+
 ## [2.7.0](https://github.com/huishouden/portal/compare/v2.6.0...v2.7.0) (2026-10-03)
 
 
