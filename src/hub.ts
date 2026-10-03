@@ -2,6 +2,7 @@ import type { AgendaItem } from '@huishouden/pwa-kit/agenda';
 import type { Contact, ContactInput } from '@huishouden/pwa-kit/contacts';
 import type { FoodInput, FoodPreferences } from '@huishouden/pwa-kit/food';
 import type { Invitation } from '@huishouden/pwa-kit/invite';
+import type { TodoItem } from '@huishouden/pwa-kit/todos';
 import { householdRole, type Role } from '@huishouden/pwa-kit/roles';
 import type { PortalLayout } from './apps';
 
@@ -63,7 +64,15 @@ export type HubState =
       agenda?: AgendaItem[];
       /** Who eats at home and what suits them (`settings/food`); undefined while loading. */
       food?: FoodPreferences;
+      /** Every app's open things to do (`households/{id}/todos`), newest first; undefined while loading. */
+      todos?: TodoItem[];
     };
+
+/** A to-do's Done or Cancel once started: the screen changes at once; `written` settles when the server has it. */
+export interface TodoRun {
+  written: Promise<void>;
+  undo: () => Promise<void>;
+}
 
 /** What the person can ask for. Each returns once done and throws an Error worded for people. */
 export interface HubActions {
@@ -82,6 +91,8 @@ export interface HubActions {
   deleteContact(contact: Contact): Promise<void>;
   restoreContact(contact: Contact): Promise<void>;
   saveFood(input: FoodInput): Promise<void>;
+  /** Runs an item's Done or Cancel in its app's data, as the signed-in member (`applyTodo`). */
+  runTodo(item: TodoItem, which: 'done' | 'cancel'): Promise<TodoRun>;
 }
 
 /** Longest household name the panel accepts. */

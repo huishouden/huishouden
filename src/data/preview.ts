@@ -101,6 +101,13 @@ function previewActions(): HubActions {
     async saveFood(input) {
       update((s) => ({ food: foodDoc(input, s.me) }));
     },
+    async runTodo(item) {
+      update((s) => ({ todos: (s.todos ?? []).filter((t) => t.id !== item.id) }));
+      return {
+        written: Promise.resolve(),
+        undo: async () => update((s) => ({ todos: [...(s.todos ?? []).filter((t) => t.id !== item.id), item] })),
+      };
+    },
     async restoreContact(contact) {
       update((s) => ({ contacts: [...contactsOf(s), contact].sort((a, b) => a.name.localeCompare(b.name)) }));
     },

@@ -19,6 +19,7 @@ import { addContact, deleteContact, markUnflaggedOpen, restoreContact, updateCon
 import { can, householdRole, isRestricted, setRole } from '@huishouden/pwa-kit/roles';
 import { sendInviteEmail } from '@huishouden/pwa-kit/invite';
 import { agendaRange, watchAgenda, type AgendaItem } from '@huishouden/pwa-kit/agenda';
+import { applyTodo, TodoActionError, watchTodos, type TodoItem } from '@huishouden/pwa-kit/todos';
 import { toYmd } from '@huishouden/pwa-kit/time';
 import { saveFood, watchFood, type FoodPreferences } from '@huishouden/pwa-kit/food';
 import { googleAccessMessage, readError } from '@huishouden/pwa-kit/feedback';
@@ -84,6 +85,7 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
   const [contacts, setContacts] = useState<Contact[] | undefined>(undefined);
   const [agenda, setAgenda] = useState<AgendaItem[] | undefined>(undefined);
   const [food, setFood] = useState<FoodPreferences | undefined>(undefined);
+  const [todos, setTodos] = useState<TodoItem[] | undefined>(undefined);
   const [remembered, setRemembered] = useState(() => rememberedHousehold(storage()) !== undefined);
   const today = useToday();
 
@@ -175,6 +177,13 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
     return watchAgenda(db, householdId, { from, to, restricted, onError: () => setAgenda([]) }, setAgenda);
   }, [householdId, today, restricted]);
 
+  // Every app's open things to do; helpers and kids ask for the open ones only.
+  useEffect(() => {
+    setTodos(undefined);
+    if (!householdId) return;
+    return watchTodos(db, householdId, { restricted, onError: () => setTodos([]) }, setTodos);
+  }, [householdId, restricted]);
+
   const state = useMemo((): HubState => {
     if (user === undefined) return { auth: 'starting', layout, remembered };
     if (!user?.email) return { auth: 'signed-out' };
@@ -205,8 +214,9 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
       contacts,
       agenda,
       food,
+      todos,
     };
-  }, [user, household, profiles, layout, contacts, agenda, food, remembered]);
+  }, [user, household, profiles, layout, contacts, agenda, food, todos, remembered]);
 
   const actions = useMemo((): HubActions => {
     const need = () => {
@@ -308,6 +318,24 @@ export function useLiveHub(): { state: HubState; actions: HubActions } {
           throw words(e, "Couldn't save the food preferences");
         });
         track('save food preferences');
+      },
+      async runTodo(item, which) {
+        const { id, me } = need();
+        try {
+          const run = await applyTodo(db, id, item, which, { me });
+          track(which === 'done' ? 'todo done' : 'todo cancel', { app: item.app });
+          return {
+            written: run.written.catch((e) => {
+              throw words(e, `Couldn't change ${item.title}`);
+            }),
+            undo: () =>
+              run.undo().catch((e) => {
+                throw words(e, `Couldn't put ${item.title} back`);
+              }),
+          };
+        } catch (e) {
+          throw e instanceof TodoActionError ? e : words(e, `Couldn't change ${item.title}`);
+        }
       },
       async restoreContact(contact) {
         const { id } = need();

@@ -7,7 +7,14 @@ import { helper, me, member, noHousehold, restoring, showHub } from './fixtures/
 // screens show invented data handed to the app (window.__hubPreview); nothing reaches Firestore.
 const fixedTime = '2026-10-01T09:00:00';
 const phone = (page: Page) => page.setViewportSize({ width: 390, height: 844 });
-const tab = (p: Page, name: string) => p.getByRole('navigation', { name: 'Sections' }).getByRole('button', { name }).click();
+/** Opens a section: in the app bar or the phone's bottom bar, or under More on a phone. */
+const tab = async (p: Page, name: string) => {
+  const nav = p.getByRole('navigation', { name: 'Sections' });
+  const direct = nav.getByRole('button', { name, exact: true });
+  if (await direct.count()) return direct.click();
+  await nav.getByRole('button', { name: /^More/ }).click();
+  await p.getByRole('dialog', { name: 'More' }).getByRole('button', { name, exact: true }).click();
+};
 const preview = (state: HubState, then?: (p: Page) => Promise<void>) => async (p: Page) => {
   await showHub(p, state);
   await then?.(p);
@@ -289,3 +296,55 @@ test('phone: contacts', async ({ page }) => {
   });
 });
 
+
+test('to-do', ({ page }) =>
+  captureScreenshot(page, 'todo', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'To-do');
+      await expect(p.getByRole('listitem', { name: 'Fix the porch light', exact: true })).toBeVisible();
+    }),
+  }));
+
+test('phone: to-do', async ({ page }) => {
+  await phone(page);
+  await captureScreenshot(page, 'phone-todo', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'To-do');
+      await expect(p.getByRole('listitem', { name: 'Fix the porch light', exact: true })).toBeVisible();
+    }),
+  });
+});
+
+test('phone: clearing out old to-dos', async ({ page }) => {
+  await phone(page);
+  await captureScreenshot(page, 'phone-todo-old', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'To-do');
+      await p.getByRole('combobox', { name: 'Show' }).selectOption('old');
+      await p.getByRole('button', { name: 'Select', exact: true }).click();
+      await p.getByRole('button', { name: /^Select all/ }).click();
+    }),
+  });
+});
+
+test('cancelling a to-do', ({ page }) =>
+  captureScreenshot(page, 'todo-cancel', {
+    fixedTime,
+    prepare: preview(member(), async (p) => {
+      await tab(p, 'To-do');
+      await p.getByRole('button', { name: 'Pause: Change HVAC filter' }).click();
+      await expect(p.getByRole('dialog')).toBeVisible();
+    }),
+  }));
+
+test('a helper’s to-do list', ({ page }) =>
+  captureScreenshot(page, 'helper-todo', {
+    fixedTime,
+    prepare: preview(helper(), async (p) => {
+      await tab(p, 'To-do');
+      await expect(p.getByRole('listitem', { name: 'Return library books', exact: true })).toBeVisible();
+    }),
+  }));
