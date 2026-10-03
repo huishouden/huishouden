@@ -160,7 +160,8 @@ test("members keep the household's food preferences, with every member listed", 
   await page.goto('/apps', { waitUntil: 'networkidle' });
   await showHub(page, member());
   const food = page.getByRole('region', { name: 'Food' });
-  await expect(food).toContainText('Meal ideas in Tasks follow these.');
+  await expect(food).toContainText('Meal ideas in Groceries follow these.');
+  await expect(food.getByRole('link', { name: 'Groceries' })).toHaveAttribute('href', '/groceries/?mode=meals');
   // Jo is a member with no saved preferences yet: listed anyway, named from the email.
   await expect(food.getByRole('list', { name: 'People' }).getByRole('listitem')).toHaveCount(4);
   await food.getByRole('button', { name: 'Add someone' }).click();

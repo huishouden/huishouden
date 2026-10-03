@@ -10,13 +10,23 @@
   },
   {
     "name": "Tasks",
-    "description": "Shared lists and chores",
+    "description": "Shared to-dos and chores",
     "repo": "tasks",
     "site": "huishouden-tasks",
     "path": "/tasks/",
     "redirect": true,
     "webApp": "Tasks",
     "glyph": "check"
+  },
+  {
+    "name": "Groceries",
+    "description": "What to get, and where it is",
+    "repo": "groceries",
+    "site": "huishouden-groceries",
+    "path": "/groceries/",
+    "redirect": true,
+    "webApp": "Groceries",
+    "glyph": "cart"
   },
   {
     "name": "Home",

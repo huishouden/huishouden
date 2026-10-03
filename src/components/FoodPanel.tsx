@@ -72,7 +72,13 @@ export function FoodPanel({ household, food, actions, fail, canEdit = true }: Pr
           </button>
         )}
       </div>
-      <p className="mb-3 text-stone-600">Who eats at home, and what suits them. Meal ideas in Tasks follow these.</p>
+      <p className="mb-3 text-stone-600">
+        Who eats at home, and what suits them. Meal ideas in{' '}
+        <a href="/groceries/?mode=meals" className="font-medium text-forest-700 underline underline-offset-2">
+          Groceries
+        </a>{' '}
+        follow these.
+      </p>
       <p className="mb-3 text-sm text-stone-600">Meal ideas keep to the lowest heat anyone picked.</p>
       {food === undefined ? (
         <p className="text-stone-600">Loading.</p>
